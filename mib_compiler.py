@@ -31,7 +31,7 @@ print(f"Found {len(mib_names)} MIB files to compile")
 
 # First try to compile the dependencies that ENTITY-MIB needs
 dependencies = ['IANA-ENTITY-MIB', 'UUID-TC-MIB', 'SNMP-FRAMEWORK-MIB', 
-                'SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF']
+                'SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF', 'SNMPv2-MIB', 'FD-ONU-MIB', 'FD-OLT-MIB', 'CDATA-EPON-MIB', 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI']
 
 print("First compiling dependencies...")
 for dep in dependencies:
