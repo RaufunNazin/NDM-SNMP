@@ -8,7 +8,7 @@ from pysnmp.smi import builder, view, compiler
 # SNMP target settings
 target_ip = "10.12.1.13"
 community_string = "faridsnmp"
-oid_to_walk = '1.3.6.1.4.1'
+oid_to_walk = '1.3.6.1.4.1.17409.2.3'
 
 # Output file
 output_filename = "snmp_output.txt"
