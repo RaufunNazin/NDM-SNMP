@@ -8,9 +8,9 @@
 # Notes
 # -----
 # ASN.1 source file://mibs/RFC-1212
-# Produced by pysmi-1.6.1 at Tue May  6 17:44:45 2025
-# On host computerfuture platform Linux version 3.10.0-1160.el7.x86_64 by user srizon
-# Using Python version 3.10.9 (main, May  6 2025, 17:33:02) [GCC 4.8.5 20150623 (Red Hat 4.8.5-44)]
+# Produced by pysmi-1.6.1 at Tue May  6 18:12:45 2025
+# On host user-HP platform Linux version 6.11.0-25-generic by user user
+# Using Python version 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0]
 
 if 'mibBuilder' not in globals():
     import sys
