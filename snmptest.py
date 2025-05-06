@@ -8,7 +8,7 @@ from pysnmp.smi import builder, view, compiler
 # SNMP target settings
 target_ip = "10.12.1.13"
 community_string = "faridsnmp"
-oid_to_walk = '1.3.6.1.4.1.34592'
+oid_to_walk = '1.3.6.1.4.1'
 
 # Output file
 output_filename = "snmp_output.txt"
@@ -62,7 +62,7 @@ async def snmp_walk(ip, community, oid):
     objects = walk_cmd(
         SnmpEngine(),
         CommunityData(community, mpModel=0),
-        await UdpTransportTarget.create((ip, 161), timeout=50, retries=3),
+        await UdpTransportTarget.create((ip, 161), timeout=500, retries=3),
         ContextData(),
         ObjectType(ObjectIdentity(oid)),
         lexicographicMode=False
