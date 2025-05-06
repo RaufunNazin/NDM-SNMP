@@ -1,0 +1,4 @@
+# SNMP Walk Output for 10.12.1.13
+# Time: 2025-05-06 16:40:28.142011
+
+Error: No SNMP response received before timeout
