@@ -8,7 +8,7 @@ from pysnmp.smi import builder, view, compiler
 # SNMP target settings
 target_ip = "10.12.1.13"
 community_string = "faridsnmp"
-oid_to_walk = '1.3.6.1'
+oid_to_walk = '1.3.6.1.4.1.34592'
 
 # Output file
 output_filename = "snmp_output.txt"
@@ -19,19 +19,14 @@ def load_mibs():
     mib_builder = builder.MibBuilder()
     
     # Add compiled MIBs directory first (higher priority)
-    compiled_mib_dir = '/home/user/Documents/snmptest/compiled_mibs'
+    compiled_mib_dir = 'compiled_mibs'
     if os.path.exists(compiled_mib_dir):
         mib_builder.add_mib_sources(builder.DirMibSource(compiled_mib_dir))
         print(f"Added compiled MIBs path: {compiled_mib_dir}")
     
-    # Also add standard pysnmp MIBs as fallback
-    mib_builder.add_mib_sources(
-        builder.DirMibSource('/home/user/Documents/snmptest/venv/lib/python3.12/site-packages/pysnmp/smi/mibs'),
-        builder.DirMibSource('/home/user/Documents/snmptest/venv/lib64/python3.12/site-packages/pysnmp/smi/mibs')
-    )
     
     # Also add source MIBs directory as last resort
-    source_mib_dir = '/home/user/Documents/snmptest/mibs'
+    source_mib_dir = 'mibs'
     mib_builder.add_mib_sources(builder.DirMibSource(source_mib_dir))
     print(f"Added source MIBs path: {source_mib_dir}")
     
@@ -59,7 +54,7 @@ async def snmp_walk(ip, community, oid):
     start_time = time.time()
     
     # Load all MIBs
-    mib_dir = '/home/user/Documents/snmptest/mibs'
+    mib_dir = 'mibs'
     mib_builder = load_mibs()
     mib_view = view.MibViewController(mib_builder)
     

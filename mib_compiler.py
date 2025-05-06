@@ -7,8 +7,8 @@ import os
 import sys
 
 # Define directories
-source_mib_dir = '/home/user/Documents/snmptest/mibs'
-output_mib_dir = '/home/user/Documents/snmptest/compiled_mibs'
+source_mib_dir = 'mibs'
+output_mib_dir = 'compiled_mibs'
 
 # Create output directory if it doesn't exist
 os.makedirs(output_mib_dir, exist_ok=True)
