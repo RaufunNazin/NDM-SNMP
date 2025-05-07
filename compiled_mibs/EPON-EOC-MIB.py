@@ -1,4 +1,4 @@
-# SNMP MIB module (CDATA-COMMON-SMI) expressed in pysnmp data model.
+# SNMP MIB module (EPON-EOC-MIB) expressed in pysnmp data model.
 #
 # This Python module is designed to be imported and executed by the
 # pysnmp library.
@@ -7,8 +7,8 @@
 #
 # Notes
 # -----
-# ASN.1 source file://mibs/CDATA-COMMON-SMI
-# Produced by pysmi-1.6.1 at Wed May  7 13:32:11 2025
+# ASN.1 source file://mibs/EPON-EOC-MIB
+# Produced by pysmi-1.6.1 at Wed May  7 13:31:38 2025
 # On host user-HP platform Linux version 6.11.0-25-generic by user user
 # Using Python version 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0]
 
@@ -100,19 +100,53 @@ if 'mibBuilder' not in globals():
 
 # MODULE-IDENTITY
 
-vendor = ModuleIdentity(
+eponeoc = ModuleIdentity(
     (1, 3, 6, 1, 4, 1, 34592)
 )
-if mibBuilder.loadTexts:
-    vendor.setRevisions(
-        ("2016-03-02 14:47",)
-    )
 
 
 # Types definitions
 
 
 # TEXTUAL-CONVENTIONS
+
+
+
+class OperSwitch(TextualConvention, Integer32):
+    status = "current"
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(1,
+              2)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 1),
+          ("disable", 2))
+    )
+
+
+
+class DeviceStatus(TextualConvention, Integer32):
+    status = "current"
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(1,
+              2,
+              3,
+              4,
+              5)
+        )
+    )
+    namedValues = NamedValues(
+        *(("notPresent", 1),
+          ("offline", 2),
+          ("online", 3),
+          ("normal", 4),
+          ("abnormal", 5))
+    )
 
 
 
@@ -154,42 +188,6 @@ class DeviceOperation(TextualConvention, Integer32):
 
 
 
-class DeviceStatus(TextualConvention, Integer32):
-    status = "current"
-    subtypeSpec = Integer32.subtypeSpec
-    subtypeSpec += ConstraintsUnion(
-        SingleValueConstraint(
-            *(1,
-              2,
-              3,
-              4,
-              5)
-        )
-    )
-    namedValues = NamedValues(
-        *(("notPresent", 1),
-          ("offline", 2),
-          ("online", 3),
-          ("normal", 4),
-          ("abnormal", 5))
-    )
-
-
-
-class DeviceType(TextualConvention, Integer32):
-    status = "current"
-    subtypeSpec = Integer32.subtypeSpec
-    subtypeSpec += ConstraintsUnion(
-        SingleValueConstraint(
-            67174657
-        )
-    )
-    namedValues = NamedValues(
-        ("fd1508gs", 67174657)
-    )
-
-
-
 class LedStatus(TextualConvention, Integer32):
     status = "current"
     subtypeSpec = Integer32.subtypeSpec
@@ -208,18 +206,118 @@ class LedStatus(TextualConvention, Integer32):
 
 
 
-class OperSwitch(TextualConvention, Integer32):
+class DeviceType(TextualConvention, Integer32):
     status = "current"
     subtypeSpec = Integer32.subtypeSpec
     subtypeSpec += ConstraintsUnion(
         SingleValueConstraint(
             *(1,
-              2)
+              2,
+              3,
+              4,
+              5,
+              8,
+              16842752,
+              16843009,
+              16974083,
+              16974084,
+              16974086,
+              16974087,
+              16974088,
+              16974089,
+              16974090,
+              16974091,
+              16974092,
+              16974094,
+              16974095,
+              16974097,
+              16974337,
+              16974337,
+              16974338,
+              16974593,
+              16974594,
+              16974850,
+              17039617,
+              17040129,
+              17105153,
+              17170689,
+              17170945,
+              17171202,
+              17236225,
+              825241671,
+              825241674,
+              825241683,
+              825241960,
+              825242728,
+              825307464,
+              825307496,
+              825307496,
+              825307757,
+              842018893,
+              858797160,
+              875573314,
+              875573325,
+              875573331,
+              875573335,
+              875643987,
+              875643991,
+              875647827,
+              875647831)
         )
     )
     namedValues = NamedValues(
-        *(("enable", 1),
-          ("disable", 2))
+        *(("ONU4FE2P", 1),
+          ("ONU4FE2P1TV", 2),
+          ("ONU24FEB", 3),
+          ("ONU4FE2PW", 4),
+          ("ONU2FE1P", 5),
+          ("ONU16FEB", 8),
+          ("SYSTEM", 16842752),
+          ("EPON-2U8P", 16843009),
+          ("ONU4D-B", 16974083),
+          ("ONU8FEB", 16974084),
+          ("ONU1FE", 16974086),
+          ("ONU1D-G", 16974087),
+          ("ONU1FE1GE", 16974088),
+          ("ONU4D-P", 16974089),
+          ("ONU3D-M", 16974090),
+          ("ONU4FE", 16974091),
+          ("ONU2D-M", 16974092),
+          ("ONU4D-GM", 16974094),
+          ("ONU2D-GM", 16974095),
+          ("ONU4GE", 16974097),
+          ("ONU4D2P", 16974337),
+          ("ONU4FE2PA", 16974337),
+          ("ONU4D2P-P", 16974338),
+          ("ONU4FE1TV-WDM", 16974593),
+          ("ONU4D1R-P", 16974594),
+          ("ONU4D2P1R-P", 16974850),
+          ("ONU24D", 17039617),
+          ("ONU4D2P1R", 17040129),
+          ("EPON-1U2P", 17105153),
+          ("EPON-1U8P", 17170689),
+          ("OLT", 17170945),
+          ("PON", 17171202),
+          ("EPON-1U4P", 17236225),
+          ("ONU1GEC", 825241671),
+          ("ONU1GEM", 825241674),
+          ("ONU1FEC", 825241683),
+          ("ONU1FECA", 825241960),
+          ("ONU4FECA", 825242728),
+          ("ONU1GE1FE1P", 825307464),
+          ("ONU1GE", 825307496),
+          ("ONU1GECA", 825307496),
+          ("ONU2GE", 825307757),
+          ("ONU2GEM", 842018893),
+          ("ONU4FE1RF", 858797160),
+          ("ONU4GEB", 875573314),
+          ("ONU4GEM", 875573325),
+          ("ONU4FEC", 875573331),
+          ("ONU4FEW", 875573335),
+          ("ONU4FE1TVCA", 875643987),
+          ("ONU4FE1TVW", 875643991),
+          ("ONU4FE1TVC-WDM", 875647827),
+          ("ONU4FE1TVW-WDM", 875647831))
     )
 
 
@@ -256,12 +354,6 @@ eoc = _Eoc_ObjectIdentity(
 )
 if mibBuilder.loadTexts:
     eoc.setStatus("current")
-_Gpon_ObjectIdentity = ObjectIdentity
-gpon = _Gpon_ObjectIdentity(
-    (1, 3, 6, 1, 4, 1, 34592, 1, 5)
-)
-if mibBuilder.loadTexts:
-    gpon.setStatus("current")
 
 # Managed Objects groups
 
@@ -281,18 +373,17 @@ if mibBuilder.loadTexts:
 # Export all MIB objects to the MIB builder
 
 mibBuilder.exportSymbols(
-    "CDATA-COMMON-SMI",
-    **{"DataDirection": DataDirection,
-       "DeviceOperation": DeviceOperation,
+    "EPON-EOC-MIB",
+    **{"OperSwitch": OperSwitch,
        "DeviceStatus": DeviceStatus,
-       "DeviceType": DeviceType,
+       "DataDirection": DataDirection,
+       "DeviceOperation": DeviceOperation,
        "LedStatus": LedStatus,
-       "OperSwitch": OperSwitch,
-       "vendor": vendor,
+       "DeviceType": DeviceType,
+       "eponeoc": eponeoc,
        "ipProduct": ipProduct,
        "mediaConverter": mediaConverter,
        "switch": switch,
        "epon": epon,
-       "eoc": eoc,
-       "gpon": gpon}
+       "eoc": eoc}
 )
