@@ -44,7 +44,16 @@ async def main():
     print(f"Retries: {snmp_retries}")
     snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, snmp_version, snmp_timeout, snmp_retries)
     
-    parsed_snmp_output = parse_onu_data(snmp_output)
+    snmp_data_str = "\n".join(snmp_output)
+    
+    output_file = 'snmp_output.txt'
+    with open(output_file, 'w') as f:
+        f.write(snmp_data_str)
+    print(f"SNMP output saved to {output_file}")
+    print("Parsing SNMP output...")
+    
+    # Parse the SNMP output
+    parsed_snmp_output = parse_onu_data(snmp_data_str)
     print(f"Parsed {len(parsed_snmp_output)} ONU devices from SNMP output.")
 
     # Insert into database unless dry run is specified
