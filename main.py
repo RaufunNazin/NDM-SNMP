@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import argparse
 from utils import snmp_walk, parse_onu_data, insert_into_db
 import cx_Oracle
+import json
 
 load_dotenv()
 
@@ -49,6 +50,7 @@ async def main():
     output_file = 'snmp_output.txt'
     with open(output_file, 'w') as f:
         f.write(snmp_data_str)
+        f.close()
     print(f"SNMP output saved to {output_file}")
     print("Parsing SNMP output...")
     
@@ -56,7 +58,8 @@ async def main():
     parsed_snmp_output = parse_onu_data(snmp_data_str)
     parsed_output_file = 'parsed_snmp_output.txt'
     with open(parsed_output_file, 'w') as f:
-        f.write(parsed_snmp_output)
+        f.write(json.dumps(parsed_snmp_output, indent=2))
+        f.close()
     print(f"Parsed SNMP output saved to {parsed_output_file}")
     print(f"Parsed {len(parsed_snmp_output)} ONU devices from SNMP output.")
 
