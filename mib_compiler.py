@@ -4,29 +4,25 @@ from pysmi.parser import SmiStarParser
 from pysmi.codegen import PySnmpCodeGen
 from pysmi.compiler import MibCompiler
 import os
+from enums import MIBS, COMPILED_MIBS
 # import logging
 # from pysmi import debug
 
 # # Set up logging to a file
-# log_file = 'pysmi_debug.log'
 
+# log_file = 'pysmi_debug.log'
 # logger = logging.getLogger('pysmi')
 # logger.setLevel(logging.DEBUG)
-
 # file_handler = logging.FileHandler(log_file)
 # file_handler.setLevel(logging.DEBUG)
-
 # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 # file_handler.setFormatter(formatter)
-
 # logger.addHandler(file_handler)
-
-# # Enable all PySMI debug modules (or specify subset)
 # debug.set_logger(debug.Debug('all'))
 
 # Define directories
-source_mib_dir = 'mibs'
-output_mib_dir = 'compiled_mibs'
+source_mib_dir = MIBS
+output_mib_dir = COMPILED_MIBS
 
 # Create output directory if it doesn't exist
 os.makedirs(output_mib_dir, exist_ok=True)
@@ -47,9 +43,9 @@ mib_names = [os.path.splitext(f)[0] for f in mib_files]
 
 print(f"Found {len(mib_names)} MIB files to compile")
 
-# First try to compile the dependencies that ENTITY-MIB needs
+# First try to compile the dependencies
 dependencies = ['IANA-ENTITY-MIB', 'UUID-TC-MIB', 'SNMP-FRAMEWORK-MIB', 
-                'SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF', 'SNMPv2-MIB', 'FD-ONU-MIB', 'FD-OLT-MIB', 'FD-SYSTEM-MIB', 'EPON-EOC-MIB']
+                'SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF', 'SNMPv2-MIB', 'FD-SYSTEM-MIB', 'EPON-EOC-MIB']
 
 print("First compiling dependencies...")
 for dep in dependencies:

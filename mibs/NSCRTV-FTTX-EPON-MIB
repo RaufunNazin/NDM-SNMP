@@ -12651,6 +12651,225 @@ UniMacAddressManagementEntry::=
 				"onu Catv Opitcal receiver information temperat."
 			::= { onuCatvOrInfoEntry 5 }
 
+-- 		--      DESCRIPTION
+-- -- "OpticalReceiver MIB"
+-- 		-- 1.3.6.1.4.1.17409.2.6
+-- 		oTTree OBJECT IDENTIFIER ::= { nscrtvEponEocTree 6 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1
+-- 		cityNetworkOpticalTransmissionCommonQuery OBJECT IDENTIFIER ::= { oTTree 1 }
+
+		
+-- -- ------------------------------------------------------------------------------
+-- -- cityNetworkOpticalTransmissionCommonQuery [](1.3.6.1.4.1.17409.2.6.1)
+-- -- -------------------------------------------------------------------------
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1
+-- 		CityNetworkOpticalTransmissionCommonTable OBJECT-TYPE
+-- 			SYNTAX SEQUENCE OF CommonEponDeviceEntry
+-- 			MAX-ACCESS not-accessible
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { cityNetworkOpticalTransmissionCommonQuery 1 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1
+-- 		commonEponDeviceEntry OBJECT-TYPE
+-- 			SYNTAX CommonEponDeviceEntry
+-- 			MAX-ACCESS not-accessible
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				"The commonEponDeviceEntry Information"
+-- 			INDEX { commonEponDeviceIndex }
+-- 			::= { CityNetworkOpticalTransmissionCommonTable 1 }
+
+		
+-- 		CommonEponDeviceEntry ::=
+-- 			SEQUENCE { 
+-- 				commonEponDeviceIndex
+-- 					INTEGER,
+-- 				commonEponDeviceType
+-- 					DisplayString,
+-- 				commonEponDeviceName
+-- 					DisplayString,
+-- 				commonEponVendorName
+-- 					DisplayString,
+-- 				commonEponModelNumber
+-- 					DisplayString,
+-- 				commonEponSerialNumber
+-- 					DisplayString,
+-- 				commonEponIpAddress
+-- 					IpAddress,
+-- 				commonEponMacAddress
+-- 					MacAddress,
+-- 				commonEponDeviceMFD
+-- 					DisplayString,
+-- 				commonEponDeviceInternalTemperature
+-- 					INTEGER,
+-- 				commonEponInputRFLevel
+-- 					INTEGER,
+-- 				commonEponOpticalInputPower
+-- 					INTEGER,
+-- 				commonEponOutputOpticalPower
+-- 					INTEGER,
+-- 				commonEponPowerVoltage
+-- 					INTEGER,
+-- 				commonEponPowerCurrent
+-- 					INTEGER
+-- 			 }
+
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.1
+-- 		commonEponDeviceIndex OBJECT-TYPE
+-- 			SYNTAX INTEGER (1..2147483647)
+-- 			MAX-ACCESS not-accessible
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				"CityNetworkOpticalTransmissionCommonQueryTable Index"
+-- 			::= { commonEponDeviceEntry 1 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.2
+-- 		commonEponDeviceType OBJECT-TYPE
+-- 			SYNTAX DisplayString (SIZE (0..255))
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { commonEponDeviceEntry 2 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.3
+-- 		commonEponDeviceName OBJECT-TYPE
+-- 			SYNTAX DisplayString (SIZE (0..255))
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { commonEponDeviceEntry 3 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.4
+-- 		commonEponVendorName OBJECT-TYPE
+-- 			SYNTAX DisplayString (SIZE (0..255))
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { commonEponDeviceEntry 4 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.5
+-- 		commonEponModelNumber OBJECT-TYPE
+-- 			SYNTAX DisplayString (SIZE (0..255))
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { commonEponDeviceEntry 5 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.6
+-- 		commonEponSerialNumber OBJECT-TYPE
+-- 			SYNTAX DisplayString (SIZE (0..255))
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { commonEponDeviceEntry 6 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.7
+-- 		commonEponIpAddress OBJECT-TYPE
+-- 			SYNTAX IpAddress
+-- 			MAX-ACCESS read-write
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				"IP"
+-- 			::= { commonEponDeviceEntry 7 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.8
+-- 		commonEponMacAddress OBJECT-TYPE
+-- 			SYNTAX INTEGER
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				"MAC"
+-- 			::= { commonEponDeviceEntry 8 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.10
+-- 		commonEponDeviceMFD OBJECT-TYPE
+-- 			SYNTAX DisplayString (SIZE (10))
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { commonEponDeviceEntry 10 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.12
+-- 		commonEponDeviceInternalTemperature OBJECT-TYPE
+-- 			SYNTAX INTEGER (-128..127)
+-- 			MAX-ACCESS read-only
+-- 			STATUS optional
+-- 			DESCRIPTION
+-- 				""
+-- 			::= { commonEponDeviceEntry 12 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.13
+-- 		commonEponInputRFLevel OBJECT-TYPE
+-- 			SYNTAX INTEGER (0..127)
+-- 			MAX-ACCESS read-only
+-- 			STATUS optional
+-- 			DESCRIPTION
+-- 				",dBuV/ch"
+-- 			::= { commonEponDeviceEntry 13 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.14
+-- 		commonEponOpticalInputPower OBJECT-TYPE
+-- 			SYNTAX INTEGER (-32768..32767)
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				",0.1dBm"
+-- 			::= { commonEponDeviceEntry 14 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.15
+-- 		commonEponOutputOpticalPower OBJECT-TYPE
+-- 			SYNTAX INTEGER (0..65535)
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				",0.1dBm"
+-- 			::= { commonEponDeviceEntry 15 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.16
+-- 		commonEponPowerVoltage OBJECT-TYPE
+-- 			SYNTAX INTEGER (-32768..32767)
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				"0.1V"
+-- 			::= { commonEponDeviceEntry 16 }
+
+		
+-- 		-- 1.3.6.1.4.1.17409.2.6.1.1.1.17
+-- 		commonEponPowerCurrent OBJECT-TYPE
+-- 			SYNTAX INTEGER (0..65535)
+-- 			MAX-ACCESS read-only
+-- 			STATUS current
+-- 			DESCRIPTION
+-- 				"0.01A"
+-- 			::= { commonEponDeviceEntry 17 }
+
+		
+
 		eponOnuWifiObject OBJECT IDENTIFIER ::= { nscrtvEponEocTree 9 }
 
 		eponWifiGroup    MODULE-IDENTITY
