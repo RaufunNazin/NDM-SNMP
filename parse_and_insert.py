@@ -17,9 +17,10 @@ db_user = os.getenv("DB_USER")
 db_pass = os.getenv("DB_PASS")
 db_sid = os.getenv("DB_SID")
 target_ip = os.getenv("TARGET_IP")
+instant_client= os.getenv("INSTANT_CLIENT_LOC")
 
 # Initialize Oracle client
-cx_Oracle.init_oracle_client(lib_dir="/snap/instantclient_23_8")
+cx_Oracle.init_oracle_client(lib_dir=instant_client)
 
 # SNMP output file
 input_file = "snmp_output.txt"

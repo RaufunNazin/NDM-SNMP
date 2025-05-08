@@ -5,7 +5,6 @@ import time
 import os
 from dotenv import load_dotenv
 from pysnmp.smi import builder, view
-import cx_Oracle
 
 load_dotenv()
 
@@ -16,33 +15,8 @@ oid_to_walk = os.getenv("OID_TO_WALK")
 snmp_version = 0 if(os.getenv("SNMP_VERSION") == "1") else 1 # 0 for SNMPv1, 1 for SNMPv2c
 snmp_timeout = int(os.getenv("SNMP_TIMEOUT", 3))  # Timeout in seconds
 snmp_retries = int(os.getenv("SNMP_RETRIES", 3))  # Number of retries
-db_host = os.getenv("DB_HOST")
-db_port = os.getenv("DB_PORT")
-db_user = os.getenv("DB_USER")
-db_pass = os.getenv("DB_PASS")
-db_sid = os.getenv("DB_SID")
-cx_Oracle.init_oracle_client(lib_dir="/snap/instantclient_23_8")
 
-if not db_host or not db_user or not db_pass or not db_sid:
-    raise ValueError("Please set DB_HOST, DB_USER, DB_PASS, and DB_SID in the .env file.")
-# Create DSN (Data Source Name)
-dsn_tns = cx_Oracle.makedsn(db_host, db_port, sid=db_sid)
-
-
-try:
-    # Establish the connection
-    connection = cx_Oracle.connect(db_user, db_pass, dsn_tns)
-    
-    # If connection is successful
-    print("Successfully connected to the Oracle database!")
-    
-    # Close the connection
-    connection.close()
-
-except cx_Oracle.DatabaseError as e:
-    error, = e.args
-    print(f"Error occurred while connecting to Oracle: {error.message}")
-    
+ 
 if not target_ip or not community_string or not oid_to_walk:
     raise ValueError("Please set TARGET_IP, COMMUNITY_STRING, and OID_TO_WALK in the .env file.")
 if not snmp_version in [0, 1]:
