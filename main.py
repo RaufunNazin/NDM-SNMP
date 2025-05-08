@@ -58,7 +58,7 @@ async def main():
     parsed_snmp_output = parse_onu_data(snmp_data_str)
     parsed_output_file = 'parsed_snmp_output.txt'
     with open(parsed_output_file, 'w') as f:
-        f.write(json.dumps(parsed_snmp_output, indent=2))
+        f.write(json.dumps(parsed_snmp_output, indent=2, default=str))
         f.close()
     print(f"Parsed SNMP output saved to {parsed_output_file}")
     print(f"Parsed {len(parsed_snmp_output)} ONU devices from SNMP output.")
