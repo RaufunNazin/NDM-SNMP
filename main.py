@@ -54,6 +54,11 @@ async def main():
     
     # Parse the SNMP output
     parsed_snmp_output = parse_onu_data(snmp_data_str)
+    parsed_output_file = 'parsed_snmp_output.txt'
+    with open(parsed_output_file, 'w') as f:
+        for onu in parsed_snmp_output:
+            f.write(f"{onu}\n")
+    print(f"Parsed SNMP output saved to {parsed_output_file}")
     print(f"Parsed {len(parsed_snmp_output)} ONU devices from SNMP output.")
 
     # Insert into database unless dry run is specified
