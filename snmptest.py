@@ -3,12 +3,50 @@ from pysnmp.hlapi.v3arch.asyncio import *
 from datetime import datetime
 import time
 import os
-from pysnmp.smi import builder, view, compiler
+from dotenv import load_dotenv
+from pysnmp.smi import builder, view
+import cx_Oracle
+
+load_dotenv()
 
 # SNMP target settings
-target_ip = "10.12.1.13"
-community_string = "faridsnmp"
-oid_to_walk = '1.3.6.1.4.1.17409.2.3'
+target_ip = os.getenv("TARGET_IP")
+community_string = os.getenv("COMMUNITY_STRING")
+oid_to_walk = os.getenv("OID_TO_WALK")
+snmp_version = 0 if(os.getenv("SNMP_VERSION") == "1") else 1 # 0 for SNMPv1, 1 for SNMPv2c
+snmp_timeout = int(os.getenv("SNMP_TIMEOUT", 3))  # Timeout in seconds
+snmp_retries = int(os.getenv("SNMP_RETRIES", 3))  # Number of retries
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_user = os.getenv("DB_USER")
+db_pass = os.getenv("DB_PASS")
+db_sid = os.getenv("DB_SID")
+cx_Oracle.init_oracle_client(lib_dir="/snap/instantclient_23_8")
+
+if not db_host or not db_user or not db_pass or not db_sid:
+    raise ValueError("Please set DB_HOST, DB_USER, DB_PASS, and DB_SID in the .env file.")
+# Create DSN (Data Source Name)
+dsn_tns = cx_Oracle.makedsn(db_host, db_port, sid=db_sid)
+
+
+try:
+    # Establish the connection
+    connection = cx_Oracle.connect(db_user, db_pass, dsn_tns)
+    
+    # If connection is successful
+    print("Successfully connected to the Oracle database!")
+    
+    # Close the connection
+    connection.close()
+
+except cx_Oracle.DatabaseError as e:
+    error, = e.args
+    print(f"Error occurred while connecting to Oracle: {error.message}")
+    
+if not target_ip or not community_string or not oid_to_walk:
+    raise ValueError("Please set TARGET_IP, COMMUNITY_STRING, and OID_TO_WALK in the .env file.")
+if not snmp_version in [0, 1]:
+    raise ValueError("Please set SNMP_VERSION to 1 for SNMPv1 or 2 for SNMPv2c in the .env file.")
 
 # Output file
 output_filename = "snmp_output.txt"
@@ -35,7 +73,7 @@ def load_mibs():
     'SNMPv2-MIB', 'SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF', 
     'RFC1213-MIB', 'IF-MIB', 'IP-MIB', 'MIKROTIK-MIB',
     'IANAifType-MIB', 'BRIDGE-MIB', 'HOST-RESOURCES-MIB', 
-    'ENTITY-MIB', 'IEEE802dot11-MIB', 'IANA-ENTITY-MIB', 'RMON-MIB', 'CDATA-EPON-MIB', 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI', 'FD-ONU-MIB', 'FD-OLT-MIB', 'NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB', 'NSCRTV-PON-TREE-EXT-MIB'
+    'ENTITY-MIB', 'IEEE802dot11-MIB', 'IANA-ENTITY-MIB', 'RMON-MIB', 'CDATA-EPON-MIB', 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI', 'NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB'
     ]
     
     for mib in core_mibs:
@@ -61,8 +99,8 @@ async def snmp_walk(ip, community, oid):
     # Create the generator for the SNMP walk operation
     objects = walk_cmd(
         SnmpEngine(),
-        CommunityData(community, mpModel=0),
-        await UdpTransportTarget.create((ip, 161), timeout=500, retries=3),
+        CommunityData(community, mpModel=snmp_version),
+        await UdpTransportTarget.create((ip, 161), timeout=snmp_timeout, retries=snmp_retries),
         ContextData(),
         ObjectType(ObjectIdentity(oid)),
         lexicographicMode=False
