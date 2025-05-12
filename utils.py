@@ -287,8 +287,14 @@ def insert_into_db(onu_data, ip, db_host, db_port, db_user, db_pass, db_sid):
         # Get the current timestamp for UDATE
         current_time = datetime.now()
         
+        # filter to check if the ONU is online by checking POWER is not None and STATUS is 1
+        active_onu_data = {index: data for index, data in onu_data.items() if data.get('POWER') is not None and data.get('STATUS') == 1}
+        if not onu_data:
+            print("No ONU records to insert. Exiting...")
+            return True
+        
         # Process each ONU record
-        for index, data in onu_data.items():
+        for index, data in active_onu_data.items():
             # Get next ID from the sequence SWITCH_SNMP_ONU_PORTS_sq
             cursor.execute("SELECT SWITCH_SNMP_ONU_PORTS_sq.nextval FROM DUAL")
             _id = cursor.fetchone()[0]
