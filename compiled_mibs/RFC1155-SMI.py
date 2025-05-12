@@ -8,7 +8,7 @@
 # Notes
 # -----
 # ASN.1 source file://mibs/RFC1155-SMI
-# Produced by pysmi-1.6.1 at Thu May  8 16:38:41 2025
+# Produced by pysmi-1.6.1 at Mon May 12 15:25:27 2025
 # On host user-HP platform Linux version 6.11.0-25-generic by user user
 # Using Python version 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0]
 

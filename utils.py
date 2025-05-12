@@ -42,6 +42,12 @@ def load_mibs():
     
     return mib_builder
 
+def parse_onu_device_index(index: int):
+    slot = (index >> 25) & 0x7F
+    pon  = (index >> 16) & 0x1FF
+    onu  = index & 0xFFFF
+    return slot, pon, onu
+
 def format_snmp_output_value(value, value_type):
     """Format the value based on its type"""
     if value_type == "OCTETSTRING":
@@ -245,12 +251,16 @@ def parse_onu_data(data):
     
     # Received Optical Power
     power_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower\.(\d+)\.(\d+)\.(\d+) = INTEGER32: (-?\d+)', data)
-    for index, port1, port2, power in power_matches:
+    for index_str, port1, port2, power in power_matches:
+        index = int(index_str)
+        slot, pon, onu = parse_onu_device_index(index)
+
+        onu_key = f"{slot}/{pon}/{onu}"
         if index not in onu_data:
             onu_data[index] = {}
         # Store both the raw value and converted dBm value
         onu_data[index]['POWER'] = convert_power_to_dbm(power)
-        onu_data[index]['IFINDEX2'] = f'{index}.{port1}.{port2}'
+        onu_data[index]['IFINDEX2'] = f'{onu_key}.{port1}.{port2}'
     
     return onu_data
 
