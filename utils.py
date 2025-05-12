@@ -250,7 +250,7 @@ def parse_onu_data(data):
             onu_data[index] = {}
         # Store both the raw value and converted dBm value
         onu_data[index]['POWER'] = convert_power_to_dbm(power)
-        onu_data[index]['IFINDEX'] = f'{index}.{port1}.{port2}'
+        onu_data[index]['IFINDEX2'] = f'{index}.{port1}.{port2}'
     
     return onu_data
 
@@ -264,7 +264,7 @@ def insert_into_db(onu_data, ip, db_host, db_port, db_user, db_pass, db_sid):
         connection = cx_Oracle.connect(db_user, db_pass, dsn_tns)
         cursor = connection.cursor()
         
-        print(f"Connected to Oracle Database. Will insert {len(onu_data)} records...")
+        print(f"Connected to Oracle Database.")
         
         # Get the switch ID from the SWITCHES table based on IP address
         try:
@@ -313,15 +313,16 @@ def insert_into_db(onu_data, ip, db_host, db_port, db_user, db_pass, db_sid):
             data.setdefault('UP_SINCE', None)
             data.setdefault('ONU_MODEL', None)
             data.setdefault('ONU_VENDOR', None)
+            data.setdefault('IFINDEX2', None)
             
             # Insert the record
             cursor.execute("""
             INSERT INTO SWITCH_SNMP_ONU_PORTS 
             (ID, PORT_ID, MAC, POWER, STATUS, IFDESCR, PORTNO, SW_ID, IFINDEX, 
-            UDATE, ONU_PORT, PON_PORT, PARENT_ID, SLNO, DISTANCE, UP_SINCE, ONU_MODEL, ONU_VENDOR)
+            UDATE, ONU_PORT, PON_PORT, PARENT_ID, SLNO, DISTANCE, UP_SINCE, ONU_MODEL, ONU_VENDOR, IFINDEX2)
             VALUES 
             (:id, :port_id, :mac, :power, :status, :ifdescr, :portno, :sw_id, :ifindex,
-            :udate, :onu_port, :pon_port, :parent_id, :slno, :distance, :up_since, :onu_model, :onu_vendor)
+            :udate, :onu_port, :pon_port, :parent_id, :slno, :distance, :up_since, :onu_model, :onu_vendor, :ifindex2)
             """, {
                 'id': _id,
                 'port_id': None,
@@ -340,14 +341,15 @@ def insert_into_db(onu_data, ip, db_host, db_port, db_user, db_pass, db_sid):
                 'distance': data['DISTANCE'],
                 'up_since': data['UP_SINCE'],
                 'onu_model': data['ONU_MODEL'],
-                'onu_vendor': data['ONU_VENDOR']
+                'onu_vendor': data['ONU_VENDOR'],
+                'ifindex2': data['IFINDEX2']
             })
         
             # Commit the transaction
             connection.commit()
             print(f"Inserted record for ONU {index} with ID {_id} with {sw_id}")
             
-        print(f"Successfully inserted {len(onu_data)} ONU records into the database.")
+        print(f"Successfully inserted {len(active_onu_data)} ONU records into the database.")
         
     except cx_Oracle.DatabaseError as e:
         error, = e.args
