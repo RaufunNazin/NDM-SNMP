@@ -43,9 +43,9 @@ def load_mibs():
     return mib_builder
 
 def parse_onu_device_index(index: int):
-    slot = (index >> 25) & 0x7F
-    pon  = (index >> 16) & 0x1FF
-    onu  = index & 0xFFFF
+    slot = (index >> 25) & 0x7F       # bits 25–31
+    pon = (index >> 19) & 0x3F        # bits 19–24
+    onu = index & 0x7FFFF             # bits 0–18
     return slot, pon, onu
 
 def format_snmp_output_value(value, value_type):
