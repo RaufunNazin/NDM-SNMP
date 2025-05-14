@@ -371,3 +371,79 @@ def insert_into_db(onu_data, ip, db_host, db_port, db_user, db_pass, db_sid):
             connection.close()
     
     return True
+
+def insert_into_db_olt_customer_mac(onu_data, ip, db_host, db_port, db_user, db_pass, db_sid):
+    # Create DSN
+    dsn_tns = cx_Oracle.makedsn(db_host, db_port, sid=db_sid)
+    
+    try:
+        # Establish connection
+        connection = cx_Oracle.connect(db_user, db_pass, dsn_tns)
+        cursor = connection.cursor()
+        
+        print(f"Connected to Oracle Database.")
+        
+        # Get the OLT ID from the SWITCHES table based on IP address
+        try:
+            cursor.execute("SELECT ID FROM SWITCHES WHERE IP = :ip", {"ip": ip})
+            result = cursor.fetchone()
+            olt_id = result[0] if result else None
+            if olt_id:
+                print(f"Retrieved OLT ID {olt_id} from SWITCHES table for IP {ip}")
+            else:
+                print(f"Warning: No OLT found with IP {ip} in SWITCHES table. SW_ID will be set to NULL.")
+        except cx_Oracle.DatabaseError as e:
+            error, = e.args
+            print(f"Error retrieving OLT ID from SWITCHES table: {error.message}")
+            olt_id = None
+        
+        # Add SW_ID to each ONU record
+        for index, data in onu_data.items():
+            data['OLT_ID'] = olt_id  # Add the retrieved SW_ID or None
+        
+        # Get the current timestamp for UDATE
+        current_time = datetime.now()
+        
+        # Process each ONU record
+        for index, data in onu_data.items():
+            # Get next ID from the sequence OLT_CUSTOMER_MAC_sq
+            cursor.execute("SELECT OLT_CUSTOMER_MAC_sq.nextval FROM DUAL")
+            _id = cursor.fetchone()[0]
+            # Set default values for missing fields
+            data.setdefault('OLT_ID', None)
+            data.setdefault('VLAN', None)
+            data.setdefault('Port', None)
+            data.setdefault('MAC', None)
+            data.setdefault('udate', None)
+            
+            # Insert the record
+            cursor.execute("""
+            INSERT INTO OLT_CUSTOMER_MAC 
+            (ID, OLT_ID, VLAN, PORT, MAC, UDATE)
+            VALUES 
+            (:id, :olt_id, :vlan, :port, :mac, :udate)
+            """, {
+                'id': _id,
+                'olt_id': data['OLT_ID'],
+                'vlan': data['VLAN'],
+                'port': data['Port'],
+                'mac': data['MAC'],
+                'udate': current_time
+            })
+        
+            # Commit the transaction
+            connection.commit()
+            print(f"Inserted record for ONU {index} with ID {_id} with {olt_id}")
+            
+        print(f"Successfully inserted {len(onu_data)} ONU records into the database.")
+        
+    except cx_Oracle.DatabaseError as e:
+        error, = e.args
+        print(f"Database error: {error.message}")
+        return False
+    finally:
+        # Close connection
+        if 'connection' in locals():
+            connection.close()
+    
+    return True
