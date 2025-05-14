@@ -253,14 +253,12 @@ def parse_onu_data(data):
     power_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower\.(\d+)\.(\d+)\.(\d+) = INTEGER32: (-?\d+)', data)
     for index_str, port1, port2, power in power_matches:
         index = int(index_str)
-        slot, pon, onu = parse_onu_device_index(index)
-
-        onu_key = f"{slot}/{pon}/{onu}"
+        onu_num = index & 0xFF
         if index not in onu_data:
             onu_data[index] = {}
         # Store both the raw value and converted dBm value
         onu_data[index]['POWER'] = convert_power_to_dbm(power)
-        onu_data[index]['IFINDEX2'] = f'{onu_key}.{port1}.{port2}'
+        onu_data[index]['IFINDEX2'] = f'epon0/{port1}/{port2}/{onu_num}'
     
     return onu_data
 

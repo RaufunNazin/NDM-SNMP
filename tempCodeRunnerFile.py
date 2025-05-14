@@ -1,0 +1,1 @@
+onu_num = device_id & 0xFF
