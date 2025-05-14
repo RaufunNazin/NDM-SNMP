@@ -31,6 +31,11 @@ try:
     onu_mac_link = wait.until(EC.element_to_be_clickable(
         (By.XPATH, "//li[contains(@class, 'el-menu-item')]//span[text()='ONU MAC']")
     ))
+
+    # Scroll the element into view using JavaScript
+    driver.execute_script("arguments[0].scrollIntoView(true);", onu_mac_link)
+
+    # Now click on the element
     onu_mac_link.click()
 
     # Step 4: Wait for MAC Information Table to load
