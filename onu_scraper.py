@@ -76,7 +76,6 @@ try:
             driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
             
             # Wait for the next button to be clickable and click it
-            wait.until(EC.element_to_be_clickable(next_button))
             next_button.click()
 
             # Wait for the page content to load after clicking "Next"
