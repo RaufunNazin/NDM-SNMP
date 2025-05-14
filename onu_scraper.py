@@ -72,7 +72,7 @@ try:
                 break
 
             # Step 6: Scroll to the "Next" button and click it
-            next_button = pager.find_element(By.CSS_SELECTOR, "btn-next")
+            next_button = pager.find_element(By.CSS_SELECTOR, ".btn-next")
             driver.execute_script("arguments[0].scrollIntoView(true);", next_button)
             
             # Wait for the next button to be clickable and click it
