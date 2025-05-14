@@ -140,7 +140,7 @@ def main():
     # Insert into database
     if not args.dry_run:
         print("Inserting data into database...")
-        insert_into_db_olt_customer_mac(onu_data, db_host, db_port, db_user, db_pass, db_sid)
+        insert_into_db_olt_customer_mac(onu_data, target_ip, db_host, db_port, db_user, db_pass, db_sid)
         print("Data inserted successfully.")
 
 if __name__ == "__main__":
