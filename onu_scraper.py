@@ -126,7 +126,7 @@ def scrape_onu_data(target_ip):
         driver.quit()
         return all_data
         
-async def main():
+def main():
     parser = argparse.ArgumentParser(description='Process ONU data from SNMP output and insert into database')
     parser.add_argument('-d', '--dry-run', action='store_true', help='Parse data but do not insert into database')
     args = parser.parse_args()
