@@ -1,7 +1,6 @@
 from pysnmp.smi import builder, view
 import re
 from datetime import datetime, timedelta
-from pysnmp.hlapi.v3arch.asyncio import *
 import time
 import os
 from enums import COMPILED_MIBS
