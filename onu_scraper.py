@@ -156,14 +156,14 @@ def insert_into_db_olt_customer_mac(onu_data, ip, db_host, db_port, db_user, db_
             olt_id = None
         
         # Add SW_ID to each ONU record
-        for index, data in onu_data:
+        for index, data in enumerate(onu_data):
             data['OLT_ID'] = olt_id  # Add the retrieved SW_ID or None
         
         # Get the current timestamp for UDATE
         current_time = datetime.now()
         
         # Process each ONU record
-        for index, data in onu_data:
+        for index, data in enumerate(onu_data):
             # Get next ID from the sequence OLT_CUSTOMER_MAC_sq
             cursor.execute("SELECT OLT_CUSTOMER_MAC_sq.nextval FROM DUAL")
             _id = cursor.fetchone()[0]
