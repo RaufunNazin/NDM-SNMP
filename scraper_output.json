@@ -1,0 +1,210 @@
+[
+    {
+        "MAC": "BC:62:CE:BB:0F:82",
+        "VLAN": "402",
+        "Port": "epon 0/1/2",
+        "ONU": "17",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "BC:E0:01:66:B0:48",
+        "VLAN": "402",
+        "Port": "epon 0/1/2",
+        "ONU": "8",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "1C:61:B4:D1:58:9B",
+        "VLAN": "402",
+        "Port": "epon 0/1/2",
+        "ONU": "11",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "CC:2D:21:89:E2:90",
+        "VLAN": "402",
+        "Port": "epon 0/1/2",
+        "ONU": "5",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "D8:32:14:77:A7:A8",
+        "VLAN": "403",
+        "Port": "epon 0/1/3",
+        "ONU": "7",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "BC:E0:01:23:3C:8F",
+        "VLAN": "403",
+        "Port": "epon 0/1/3",
+        "ONU": "5",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "7C:F1:7E:9A:FD:09",
+        "VLAN": "403",
+        "Port": "epon 0/1/3",
+        "ONU": "5",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "A8:42:A1:C8:A2:3D",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "57",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "6C:68:A4:C6:89:95",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "63",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "DC:8E:8D:85:01:7E",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "43",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "E4:FA:C4:7E:BE:74",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "3",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "28:87:BA:5A:D4:75",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "63",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "54:AF:97:26:B9:8F",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "51",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "74:DA:88:A1:4A:E5",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "33",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "5C:E9:31:8B:59:A5",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "48",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "5C:A6:E6:A0:9E:1D",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "50",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "88:BD:09:17:49:CF",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "4",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "9C:9D:7E:84:BE:73",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "2",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "28:87:BA:8D:48:AB",
+        "VLAN": "2221",
+        "Port": "epon 0/2/1",
+        "ONU": "1",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "0C:80:63:4C:95:DD",
+        "VLAN": "2221",
+        "Port": "epon 0/2/4",
+        "ONU": "8",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "3C:64:CF:26:00:C3",
+        "VLAN": "2221",
+        "Port": "epon 0/2/4",
+        "ONU": "16",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "B0:19:21:15:56:43",
+        "VLAN": "2221",
+        "Port": "epon 0/2/4",
+        "ONU": "14",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "58:D9:D5:2A:06:18",
+        "VLAN": "2221",
+        "Port": "epon 0/2/4",
+        "ONU": "16",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "10:62:EB:7D:B9:10",
+        "VLAN": "2221",
+        "Port": "epon 0/2/4",
+        "ONU": "7",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "BC:62:CE:15:06:4C",
+        "VLAN": "2221",
+        "Port": "epon 0/2/4",
+        "ONU": "6",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    },
+    {
+        "MAC": "DC:8E:8D:86:4F:47",
+        "VLAN": "2221",
+        "Port": "epon 0/2/4",
+        "ONU": "1",
+        "Device description": "N/A",
+        "MAC type": "Dynamic"
+    }
+]

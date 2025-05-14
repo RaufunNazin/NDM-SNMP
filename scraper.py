@@ -4,9 +4,8 @@ from selenium.webdriver.common.by import By
 import time
 
 # Setup
-service = Service('/usr/local/bin/geckodriver')
 options = webdriver.FirefoxOptions()
-driver = webdriver.Firefox(service=service, options=options)
+driver = webdriver.Firefox(executable_path='/home/maestro/bin/geckodriver',firefox_options=options)
 
 # Open the page
 driver.get("https://books.toscrape.com/")
