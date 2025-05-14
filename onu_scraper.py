@@ -144,4 +144,4 @@ async def main():
         print("Data inserted successfully.")
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
