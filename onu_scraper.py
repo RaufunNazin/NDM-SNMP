@@ -4,11 +4,11 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
-import asyncio
+import cx_Oracle
+from datetime import datetime
 import os
 from dotenv import load_dotenv
 import argparse
-from utils import insert_into_db_olt_customer_mac
 import json
 
 load_dotenv()
@@ -19,6 +19,10 @@ db_port = os.getenv("DB_PORT")
 db_user = os.getenv("DB_USER")
 db_pass = os.getenv("DB_PASS")
 db_sid = os.getenv("DB_SID")
+instant_client = os.getenv("INSTANT_CLIENT_LOC")
+
+cx_Oracle.init_oracle_client(lib_dir=instant_client)
+
 
 if not target_ip or not db_host or not db_user or not db_pass or not db_sid:
     raise ValueError("Please set TARGET_IP, DB_HOST, DB_USER, DB_PASS, and DB_SID in the .env file.")
@@ -125,6 +129,82 @@ def scrape_onu_data(target_ip):
     finally:
         driver.quit()
         return all_data
+    
+def insert_into_db_olt_customer_mac(onu_data, ip, db_host, db_port, db_user, db_pass, db_sid):
+    # Create DSN
+    dsn_tns = cx_Oracle.makedsn(db_host, db_port, sid=db_sid)
+    
+    try:
+        # Establish connection
+        connection = cx_Oracle.connect(db_user, db_pass, dsn_tns)
+        cursor = connection.cursor()
+        
+        print(f"Connected to Oracle Database.")
+        
+        # Get the OLT ID from the SWITCHES table based on IP address
+        try:
+            cursor.execute("SELECT ID FROM SWITCHES WHERE IP = :ip", {"ip": ip})
+            result = cursor.fetchone()
+            olt_id = result[0] if result else None
+            if olt_id:
+                print(f"Retrieved OLT ID {olt_id} from SWITCHES table for IP {ip}")
+            else:
+                print(f"Warning: No OLT found with IP {ip} in SWITCHES table. SW_ID will be set to NULL.")
+        except cx_Oracle.DatabaseError as e:
+            error, = e.args
+            print(f"Error retrieving OLT ID from SWITCHES table: {error.message}")
+            olt_id = None
+        
+        # Add SW_ID to each ONU record
+        for index, data in onu_data.items():
+            data['OLT_ID'] = olt_id  # Add the retrieved SW_ID or None
+        
+        # Get the current timestamp for UDATE
+        current_time = datetime.now()
+        
+        # Process each ONU record
+        for index, data in onu_data.items():
+            # Get next ID from the sequence OLT_CUSTOMER_MAC_sq
+            cursor.execute("SELECT OLT_CUSTOMER_MAC_sq.nextval FROM DUAL")
+            _id = cursor.fetchone()[0]
+            # Set default values for missing fields
+            data.setdefault('OLT_ID', None)
+            data.setdefault('VLAN', None)
+            data.setdefault('Port', None)
+            data.setdefault('MAC', None)
+            data.setdefault('udate', None)
+            
+            # Insert the record
+            cursor.execute("""
+            INSERT INTO OLT_CUSTOMER_MAC 
+            (ID, OLT_ID, VLAN, PORT, MAC, UDATE)
+            VALUES 
+            (:id, :olt_id, :vlan, :port, :mac, :udate)
+            """, {
+                'id': _id,
+                'olt_id': data['OLT_ID'],
+                'vlan': data['VLAN'],
+                'port': data['Port'],
+                'mac': data['MAC'],
+                'udate': current_time
+            })
+        
+            # Commit the transaction
+            connection.commit()
+            print(f"Inserted record for ONU {index} with ID {_id} with {olt_id}")
+            
+        print(f"Successfully inserted {len(onu_data)} ONU records into the database.")
+        
+    except cx_Oracle.DatabaseError as e:
+        error, = e.args
+        print(f"Database error: {error.message}")
+        return False
+    finally:
+        # Close connection
+        if 'connection' in locals():
+            connection.close()
+    
+    return True
         
 def main():
     parser = argparse.ArgumentParser(description='Process ONU data from SNMP output and insert into database')
@@ -141,7 +221,6 @@ def main():
     if not args.dry_run:
         print("Inserting data into database...")
         insert_into_db_olt_customer_mac(onu_data, target_ip, db_host, db_port, db_user, db_pass, db_sid)
-        print("Data inserted successfully.")
 
 if __name__ == "__main__":
     main()
