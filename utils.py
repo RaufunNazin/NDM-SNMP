@@ -163,102 +163,99 @@ def format_mac(hex_mac):
 # Function to convert received optical power from INTEGER32 to dBm
 def convert_power_to_dbm(power_value):
     # Optical power is typically stored in units of 0.1 dBm or 0.01 dBm
-    # The negative values indicate it's in 0.1 dBm
+    # The value -2268 suggests units of 0.01 dBm, hence division by 100.
     return float(power_value) / 100.0  # Divide by 100 for dBm value
 
 # Function to parse SNMP output and extract ONU data
-def parse_onu_data(data):
-    onu_data = {}
-    
-    # Extract data using regex patterns
+def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal 'data' variables
+    onu_data = {} # This dictionary will use string keys for ONU indices
+
+    # Helper to initialize ONU entry if it doesn't exist and set IFINDEX
+    def ensure_onu_entry(index_key_str):
+        if index_key_str not in onu_data:
+            onu_data[index_key_str] = {}
+            # Populate IFINDEX using the string key, converted to an integer
+            onu_data[index_key_str]['IFINDEX'] = int(index_key_str)
+
     # MAC Address
-    mac_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuMacAddress\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data)
-    for index, mac in mac_matches:
-        if index not in onu_data:
-            onu_data[index] = {}
-        onu_data[index]['MAC'] = format_mac(mac)
-        onu_data[index]['IFINDEX'] = int(index)
+    mac_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuMacAddress\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
+    for index_s, mac in mac_matches:
+        ensure_onu_entry(index_s)
+        onu_data[index_s]['MAC'] = format_mac(mac)
         
     # Serial Number
-    sn_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuSn\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data)
-    for index, sn in sn_matches:
-        if index not in onu_data:
-            onu_data[index] = {}
-        onu_data[index]['SLNO'] = format_mac(sn)
+    sn_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuSn\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
+    for index_s, sn in sn_matches:
+        ensure_onu_entry(index_s)
+        onu_data[index_s]['SLNO'] = format_mac(sn)
     
-    # Operation Status
-    status_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuOperationStatus\.(\d+) = INTEGER32: (\d+)', data)
-    for index, status in status_matches:
-        if index not in onu_data:
-            onu_data[index] = {}
-        onu_data[index]['STATUS'] = int(status)
+    # Operation Status - Made INTEGER32 optional in regex
+    status_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuOperationStatus\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
+    for index_s, status_val in status_matches:
+        ensure_onu_entry(index_s)
+        onu_data[index_s]['STATUS'] = int(status_val)
     
-    # Admin Status
-    admin_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuAdminStatus\.(\d+) = INTEGER32: (\d+)', data)
-    for index, status in admin_matches:
-        if index not in onu_data:
-            onu_data[index] = {}
-        if str(status) == '2':
-            onu_data[index]['STATUS'] = 3
+    # Admin Status - Made INTEGER32 optional in regex
+    admin_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuAdminStatus\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
+    for index_s, status_val in admin_matches:
+        ensure_onu_entry(index_s)
+        # Assuming '2' means disabled, and you want to map it to status '3'
+        if str(status_val) == '2': 
+            onu_data[index_s]['STATUS'] = 3 
     
-    # Distance
-    distance_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuTestDistance\.(\d+) = INTEGER32: (\d+)', data)
-    for index, distance in distance_matches:
-        if index not in onu_data:
-            onu_data[index] = {}
-        onu_data[index]['DISTANCE'] = int(distance)
+    # Distance - Made INTEGER32 optional in regex
+    distance_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuTestDistance\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
+    for index_s, distance in distance_matches:
+        ensure_onu_entry(index_s)
+        onu_data[index_s]['DISTANCE'] = int(distance)
     
     # Time Since Last Register (for UP_SINCE calculation)
-    time_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuTimeSinceLastRegister\.(\d+) = Counter32: (\d+)', data)
-    for index, seconds in time_matches:
-        if index not in onu_data:
-            onu_data[index] = {}
-        # Calculate UP_SINCE date based on current time minus the seconds
+    # Sample output shows "Counter32: 5954", assuming value is in seconds.
+    time_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuTimeSinceLastRegister\.(\d+) = Counter32: (\d+)', data_str)
+    for index_s, seconds_str in time_matches:
+        ensure_onu_entry(index_s)
         current_time = datetime.now()
-        up_since = current_time - timedelta(seconds=int(seconds))
-        onu_data[index]['UP_SINCE'] = up_since
+        up_since = current_time - timedelta(seconds=int(seconds_str))
+        onu_data[index_s]['UP_SINCE'] = up_since
     
     # Vendor ID
-    vendor_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuVendorId\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data)
-    for index, vendor_hex in vendor_matches:
-        if index not in onu_data:
-            onu_data[index] = {}
+    vendor_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuVendorId\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
+    for index_s, vendor_hex in vendor_matches:
+        ensure_onu_entry(index_s)
         # Convert hex to ASCII, filtering only printable characters
-        vendor = ''.join([chr(int(h, 16)) for h in vendor_hex.split() if int(h, 16) >= 32 and int(h, 16) <= 126])
-        onu_data[index]['ONU_VENDOR'] = vendor.strip()
+        vendor = ''.join([chr(int(h, 16)) for h in vendor_hex.split() if 32 <= int(h, 16) <= 126])
+        onu_data[index_s]['ONU_VENDOR'] = vendor.strip()
     
-    # Model ID
-    model_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuModelId\.(\d+) = (?:STRING: "([^"]+)"|Hex-STRING: ([0-9A-F ]+))', data)
+    # Model ID - Made regex for string non-greedy and improved hex decoding
+    model_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuModelId\.(\d+) = (?:STRING: "([^"]*)"|Hex-STRING: ([0-9A-F ]+))', data_str)
     for match in model_matches:
-        index = match[0]
-        if index not in onu_data:
-            onu_data[index] = {}
+        index_s = match[0]
+        ensure_onu_entry(index_s)
         
-        # If it's a string value
-        if match[1]:
-            model = match[1].split('(')[0]  # Remove the hex part if present
-            onu_data[index]['ONU_MODEL'] = model.strip()
-        # If it's a hex value
-        elif match[2]:
-            hex_value = match[2]
+        model_str_val = match[1]  # Captured group for STRING
+        model_hex_val = match[2]  # Captured group for Hex-STRING
+        model = ""
+
+        if model_str_val is not None: # Check if STRING part matched
+            model = model_str_val.split('(')[0].strip() # Remove hex part if present, e.g. "ModelName (0123ABCD)"
+        elif model_hex_val is not None: # Check if Hex-STRING part matched
             try:
-                # Convert hex string to bytes
-                byte_data = bytes.fromhex(hex_value)
-                model = byte_data.decode('utf-8', errors='ignore')
-            except Exception as e:
-                model = ''
-            onu_data[index]['ONU_MODEL'] = model.strip()
+                # Remove spaces before converting hex to bytes
+                byte_data = bytes.fromhex(model_hex_val.replace(" ", ""))
+                model = byte_data.decode('utf-8', errors='ignore').strip()
+            except ValueError: 
+                model = "" # Or log an error
+        onu_data[index_s]['ONU_MODEL'] = model
     
-    # Received Optical Power
-    power_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower\.(\d+)\.(\d+)\.(\d+) = INTEGER32: (-?\d+)', data)
-    for index_str, port1, port2, power in power_matches:
-        index = int(index_str)
-        onu_num = index & 0xFF
-        if index not in onu_data:
-            onu_data[index] = {}
-        # Store both the raw value and converted dBm value
-        onu_data[index]['POWER'] = convert_power_to_dbm(power)
-        onu_data[index]['IFINDEX2'] = f'epon0/{port1}/{port2}/{onu_num}'
+    # Received Optical Power - Made INTEGER32 optional in regex
+    power_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower\.(\d+)\.(\d+)\.(\d+) = INTEGER(?:32)?: (-?\d+)', data_str)
+    for index_s, port1, port2, power_val_str in power_matches: # index_s is the string ONU index
+        ensure_onu_entry(index_s) # Use the string index as the key
+        
+        # For onu_num calculation, int(index_s) is fine
+        onu_num_val = int(index_s) & 0xFF 
+        onu_data[index_s]['POWER'] = convert_power_to_dbm(power_val_str)
+        onu_data[index_s]['IFINDEX2'] = f'epon0/{port1}/{port2}/{onu_num_val}'
     
     return onu_data
 
