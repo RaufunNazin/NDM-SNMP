@@ -88,7 +88,7 @@ def scrape_onu_data(target_ip):
                         "OLT_ID": None,
                         "MAC": raw.get("MAC"),
                         "VLAN": raw.get("VLAN"),
-                        "Port": f"{raw.get('Port')}/{raw.get('ONU')}",
+                        "Port": f"{raw.get('Port').replace(' ', '')}/{raw.get('ONU')}",
                     }
                     all_data.append(cleaned)
 
