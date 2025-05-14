@@ -91,7 +91,7 @@ try:
     # Save the data to a JSON file
     with open('scraper_output.json', 'w') as f:
         json.dump(all_data, f, indent=4)
-        print("Data saved to scraper_output.json")
+        print(f"{len(all_data)} Data saved to scraper_output.json")
 
 finally:
     driver.quit()
