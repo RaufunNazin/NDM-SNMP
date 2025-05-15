@@ -138,7 +138,7 @@ async def determine_olt_type(target_ip, community_string, port=161, version=0, r
     
     return determined_type
 
-async def get_olt_information(target_ip, community_string, port=161, version=0, retries = 3, timeout = 3, branch = 'mac', brand='CDATA'):
+async def get_olt_information(target_ip, community_string, port=161, version=0, retries = 3, timeout = 3, branch = 'mac', brand='CDATA_EPON'):
     """
     Perform an SNMP walk operation to retrieve OLT information.
     Args:
@@ -207,7 +207,7 @@ async def get_olt_information(target_ip, community_string, port=161, version=0, 
                 # Format the value based on its type
                 value_type = type(value).__name__.upper()
                 
-                if(brand == 'CDATA'):
+                if(brand == 'CDATA_EPON' or brand == 'CDATA_GPON'):
                     formatted_value = format_cdata_values(value, value_type)
                 else:
                     formatted_value = f"{value_type}: {value.prettyPrint()}"
@@ -348,7 +348,7 @@ def process_snmp_data(snmp_output_lines, brand, olt_type):
     
     Args:
         snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
-        brand (str): The brand of the device (e.g., 'CDATA').
+        brand (str): The brand of the device (e.g., 'CDATA_EPON').
         olt_type (str): The type of OLT, either 'epon' or 'gpon'.
     
     Returns:
