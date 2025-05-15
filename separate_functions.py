@@ -309,7 +309,7 @@ def process_cdata(snmp_output_lines, olt_type):
                 except ValueError:
                     print(f"Warning: Could not parse power value '{raw_value_str}' as int for line: {line}")
                     parsed_value = raw_value_str # Fallback
-            elif "timeSinceLastRegister" in oid_key: #Specific handling for time since last register
+            elif "onuTimeSinceLastRegister" in oid_key: #Specific handling for time since last register
                 try:
                     # raw_value_str is the numeric part, e.g., "12345"
                     current_time = datetime.now()
