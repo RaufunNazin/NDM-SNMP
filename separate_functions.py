@@ -7,31 +7,31 @@ from convert import decode_epon_device_index
 
 olt_information = {
     'mac': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.7'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.7'
     },
     'oper_status': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.8'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.8'
     },
     'admin_status': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.9'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.9'
     },
     'distance': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.15'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.15'
     },
     'up_since': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.18'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.18'
     },
     'vendor': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.25'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.25'
     },
     'model': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.26'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.26'
     },
     'sn': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.28'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.28'
     },
     'power': {
-        'CDATA': '1.3.6.1.4.1.17409.2.3.4.2.1.4'
+        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.2.1.4'
     } 
 }
 
@@ -222,7 +222,7 @@ async def get_olt_information(target_ip, community_string, port=161, version=0, 
     print(f"SNMP walk completed. Found {len(result)} OIDs.")
     return result
 
-def process_cdata(snmp_output_lines, olt_type='epon'):
+def process_cdata(snmp_output_lines, olt_type):
     """
     Processes SNMP output lines to extract and structure data.
     The function assumes indices in the OIDs are EPON device IDs
@@ -354,7 +354,7 @@ def process_snmp_data(snmp_output_lines, brand, olt_type):
     Returns:
         list: A list of dictionaries with processed data.
     """
-    if brand == 'CDATA':
+    if brand == 'CDATA_EPON' or brand == 'CDATA_GPON':
         return process_cdata(snmp_output_lines, olt_type)
     else:
         print(f"Unsupported brand: {brand}")
@@ -368,12 +368,15 @@ async def main():
     retries = 3
     timeout = 3
     branch = 'mac'
-    brand = 'CDATA'
+    
+    # Get OLT type
+    olt_type = await determine_olt_type(target_ip, community_string, port, version, retries, timeout)
+    
+    brand = f'CDATA_{olt_type.upper()}'
     
     # Call the function to get OLT information
     result = await get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand)
-    # Get OLT type
-    olt_type = await determine_olt_type(target_ip, community_string, port, version, retries, timeout)
+    
     # Process the SNMP data
     processed_data = process_snmp_data(result, brand, olt_type)
     
