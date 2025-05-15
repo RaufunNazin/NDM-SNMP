@@ -5,6 +5,7 @@ from utils import load_mibs, format_mac, convert_power_to_dbm, decode_epon_devic
 import asyncio
 from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA_EPON, CDATA_GPON, OCTETSTRING, HEX_STRING, OID, OID_SHORT, GAUGE, GAUGE32, INTEGER, STRING, COUNTER, COUNTER32, COUNTER64, TIMETICKS, IPADDRESS, NULL, FRAME_ID, SLOT_ID, PON_ID, ONU_ID
 import argparse
+from datetime import datetime, timedelta
 
 olt_information = {
     MAC: {
@@ -308,6 +309,14 @@ def process_cdata(snmp_output_lines, olt_type):
                 except ValueError:
                     print(f"Warning: Could not parse power value '{raw_value_str}' as int for line: {line}")
                     parsed_value = raw_value_str # Fallback
+            elif "timeSinceLastRegister" in oid_key: #Specific handling for time since last register
+                try:
+                    # raw_value_str is the numeric part, e.g., "12345"
+                    current_time = datetime.now()
+                    parsed_value = current_time - timedelta(seconds=int(raw_value_str))
+                except ValueError:
+                    print(f"Warning: Could not parse time value '{raw_value_str}' as int for line: {line}")
+                    parsed_value = raw_value_str
             elif value_type_indicator == HEX_STRING:
                 # As per prompt, other Hex-STRINGs are formatted like MAC (e.g. ONU SN, MAC)
                 parsed_value = format_mac(raw_value_str)
@@ -380,8 +389,8 @@ async def main():
     parser.add_argument("--ip", required=True, help="Target OLT IP address")
     parser.add_argument("--community", required=True, help="SNMP community string")
     parser.add_argument("--port", type=int, default=161, help="SNMP port (default: 161)")
-    parser.add_argument("--branch", default="MAC", choices=list(branch_name_to_constant_map.keys()),
-                        help="OID branch to query (default: MAC)")
+    parser.add_argument("--branch", default=MAC, choices=list(branch_name_to_constant_map.keys()),
+                        help="OID branch to query (default: mac)")
     parser.add_argument("--brand-prefix", default="CDATA",
                         help="Brand prefix, e.g., CDATA. _EPON or _GPON will be appended based on detected OLT type (default: CDATA)")
     parser.add_argument("--version", type=int, default=0, choices=[0, 1], help="SNMP version (0 for v1, 1 for v2c; default: 0)")
