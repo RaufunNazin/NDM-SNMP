@@ -6,6 +6,10 @@ import asyncio
 from convert import decode_epon_device_index
 
 olt_information = {
+    """
+    OLT information OIDs for different branches and brands.
+    The keys are the branch names, and the values are dictionaries
+    """
     'mac': {
         'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.7'
     },
@@ -36,7 +40,14 @@ olt_information = {
 }
 
 def format_cdata_values(value, value_type):
-    """Format the value based on its type"""
+    """
+    Format the value based on its type
+    Args:
+        value: The value to format.
+        value_type (str): The type of the value (e.g., "OCTETSTRING", "INTEGER").
+    Returns:
+        str: The formatted value as a string.
+    """
     if value_type == "OCTETSTRING":
         # Check if the value is a printable string
         decoded_value = value.prettyPrint()
@@ -72,8 +83,80 @@ def format_cdata_values(value, value_type):
         return '""'
     else:
         return f"{value_type}: {value.prettyPrint()}"
+    
+async def determine_olt_type(target_ip, community_string, port=161, version=0, retries=3, timeout=3, snmp_engine=None):
+    """
+    Determines OLT type (epon/gpon) by walking ifDescr.
+    Args:
+        target_ip (str): The IP address of the target device.
+        community_string (str): The SNMP community string.
+        port (int): SNMP port.
+        version (int): SNMP version.
+        retries (int): SNMP retries.
+        timeout (int): SNMP timeout.
+        snmp_engine (SnmpEngine, optional): An existing SnmpEngine instance. Defaults to None, creating a new one.
+    Returns:
+        str: "epon", "gpon", or "unknown".
+    """
+    if_descr_oid = '1.3.6.1.2.1.2.2.1.2'  # ifDescr
+    determined_type = "unknown"
+
+    engine = snmp_engine or SnmpEngine()
+    
+    try:
+        async for errorIndication, errorStatus, errorIndex, varBinds in walk_cmd(
+            engine,
+            CommunityData(community_string, mpModel=version),
+            await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
+            ContextData(),
+            ObjectType(ObjectIdentity(if_descr_oid)),
+            lexicographicMode=False
+        ):
+            if errorIndication:
+                print(f"OLT Type Determination - SNMP Error: {errorIndication}")
+                break
+            elif errorStatus:
+                print(f"OLT Type Determination - SNMP Status Error: {errorStatus.prettyPrint()} at {errorIndex and varBinds[int(errorIndex) - 1][0] or '?'}")
+                break
+            else:
+                for varBind in varBinds:
+                    _oid, value = varBind
+                    # Value is typically OctetString for ifDescr
+                    descr = ""
+                    if hasattr(value, 'prettyPrint'):
+                        descr = value.prettyPrint().lower()
+                    elif isinstance(value, bytes): # Fallback for raw bytes
+                        try:
+                            descr = value.decode('utf-8', errors='ignore').lower()
+                        except:
+                             pass # Ignore decoding errors for non-string bytes
+
+                    if 'epon' in descr:
+                        determined_type = "epon"
+                        return determined_type  # Found, can exit early
+                    elif 'gpon' in descr:
+                        determined_type = "gpon"
+                        return determined_type  # Found, can exit early
+    except Exception as e:
+        print(f"Exception during OLT type determination: {e}")
+    
+    return determined_type
 
 async def get_olt_information(target_ip, community_string, port=161, version=0, retries = 3, timeout = 3, branch = 'mac', brand='CDATA'):
+    """
+    Perform an SNMP walk operation to retrieve OLT information.
+    Args:
+        target_ip (str): The IP address of the target device.
+        community_string (str): The SNMP community string.
+        port (int): The SNMP port (default is 161).
+        version (int): SNMP version (0 for v1, 1 for v2c, 3 for v3).
+        retries (int): Number of retries for SNMP requests.
+        timeout (int): Timeout in seconds for SNMP requests.
+        branch (str): The branch of OLT information to retrieve.
+        brand (str): The brand of the device.
+    Returns:
+        list: A list of strings containing the OLT information.
+    """
     result = []
     # Start timing
     start_time = time.time()
@@ -143,7 +226,7 @@ async def get_olt_information(target_ip, community_string, port=161, version=0, 
     print(f"SNMP walk completed. Found {len(result)} OIDs.")
     return result
 
-def process_snmp_data(snmp_output_lines):
+def process_cdata(snmp_output_lines, olt_type='epon'):
     """
     Processes SNMP output lines to extract and structure data.
     The function assumes indices in the OIDs are EPON device IDs
@@ -152,6 +235,7 @@ def process_snmp_data(snmp_output_lines):
     Args:
         snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
                                   Example format: "MIB-NAME::objectName.index... = ValueType: ValueString"
+        olt_type (str): The type of OLT, either 'epon' or 'gpon'. Default is 'epon'.
 
     Returns:
         list: An array of objects (list of dictionaries).
@@ -216,7 +300,7 @@ def process_snmp_data(snmp_output_lines):
             slot_id = decoded_indices["Slot ID"]
             pon_id = decoded_indices["PON ID"]
             onu_id = decoded_indices["ONU ID"]
-            frame_id = f"0/{slot_id}/{pon_id}/{onu_id}"
+            frame_id = f"{olt_type}0/{slot_id}/{pon_id}/{onu_id}"
 
             # Parse the value based on OID key and value type
             parsed_value = None
@@ -262,6 +346,24 @@ def process_snmp_data(snmp_output_lines):
         
     return result_array
 
+def process_snmp_data(snmp_output_lines, brand, olt_type):
+    """
+    Process SNMP data based on the brand.
+    
+    Args:
+        snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
+        brand (str): The brand of the device (e.g., 'CDATA').
+        olt_type (str): The type of OLT, either 'epon' or 'gpon'.
+    
+    Returns:
+        list: A list of dictionaries with processed data.
+    """
+    if brand == 'CDATA':
+        return process_cdata(snmp_output_lines, olt_type)
+    else:
+        print(f"Unsupported brand: {brand}")
+        return []
+
 async def main():
     target_ip = '10.12.1.13'
     community_string = 'faridsnmp'
@@ -274,8 +376,10 @@ async def main():
     
     # Call the function to get OLT information
     result = await get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand)
+    # Get OLT type
+    olt_type = await determine_olt_type(target_ip, community_string, port, version, retries, timeout)
     # Process the SNMP data
-    processed_data = process_snmp_data(result)
+    processed_data = process_snmp_data(result, brand, olt_type)
     
     # Print the result
     for item in processed_data:
