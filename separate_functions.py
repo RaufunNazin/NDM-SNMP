@@ -295,10 +295,11 @@ def process_cdata(snmp_output_lines, olt_type):
             # Decode device ID to frame ID using decode_epon_device_index
             device_id_int = int(device_id_str) # Can raise ValueError
             decoded_indices = decode_epon_device_index(device_id_int)
+            frame_id = 0
             slot_id = decoded_indices[SLOT_ID]
             pon_id = decoded_indices[PON_ID]
             onu_id = decoded_indices[ONU_ID]
-            frame_id = f"{olt_type}0/{slot_id}/{pon_id}/{onu_id}"
+            frame_id = f"{olt_type}{frame_id}/{slot_id}/{pon_id}/{onu_id}"
 
             # Parse the value based on OID key and value type
             parsed_value = None
