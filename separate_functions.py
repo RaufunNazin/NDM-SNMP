@@ -4,6 +4,7 @@ import time
 from utils import load_mibs, format_mac, convert_power_to_dbm
 import asyncio
 from convert import decode_epon_device_index
+import re
 
 olt_information = {
     'mac': {
