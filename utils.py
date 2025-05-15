@@ -87,7 +87,7 @@ def format_snmp_output_value(value, value_type):
         return f"{value_type}: {value.prettyPrint()}"
 
 # Perform SNMP Walk using async walk_cmd
-async def snmp_walk(ip, community, oid, snmp_version=0, snmp_timeout=3, snmp_retries=3):
+async def snmp_walk(ip, community, oid, port=161, snmp_version=0, snmp_timeout=3, snmp_retries=3):
     result = []
     # Start timing
     start_time = time.time()
@@ -100,7 +100,7 @@ async def snmp_walk(ip, community, oid, snmp_version=0, snmp_timeout=3, snmp_ret
     objects = walk_cmd(
         SnmpEngine(),
         CommunityData(community, mpModel=snmp_version),
-        await UdpTransportTarget.create((ip, 161), timeout=snmp_timeout, retries=snmp_retries),
+        await UdpTransportTarget.create((ip, port), timeout=snmp_timeout, retries=snmp_retries),
         ContextData(),
         ObjectType(ObjectIdentity(oid)),
         lexicographicMode=False
