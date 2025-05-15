@@ -1,8 +1,9 @@
 from pysnmp.smi import view
 from pysnmp.hlapi.v3arch.asyncio import *
 import time
-from utils import load_mibs
+from utils import load_mibs, format_mac, convert_power_to_dbm
 import asyncio
+from convert import decode_epon_device_index
 
 olt_information = {
     'mac': {
@@ -142,6 +143,84 @@ async def get_olt_information(target_ip, community_string, port=161, version=0, 
     print(f"SNMP walk completed. Found {len(result)} OIDs.")
     return result
 
+def process_snmp_data(snmp_output_lines):
+    """
+    Processes SNMP output lines to extract and structure data.
+
+    Args:
+        snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
+
+    Returns:
+        list: An array of objects (list of dictionaries) containing parsed data.
+              Example: [{ "macAddress": { "frameid1": "mac_val1", ... } },
+                        { "ReceivedOpticalPower": { "frameid2": "power_val2", ... } }]
+    """
+    mac_address_data = {}
+    optical_power_data = {}
+
+    # Regex for NSCRTV-FTTX-EPON-MIB::onuMacAddress
+    # Example: NSCRTV-FTTX-EPON-MIB::onuMacAddress.38285331 = Hex-STRING: A2 4F 02 18 E5 80
+    mac_regex = re.compile(
+        r"NSCRTV-FTTX-EPON-MIB::onuMacAddress\.(\d+) = Hex-STRING: ([\dA-Fa-f\s]+)"
+    )
+
+    # Regex for NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower
+    # Example: NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower.38285328.2.4 = INTEGER32: -1280
+    power_regex = re.compile(
+        r"NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower\.(\d+)(?:\.\d+)* = \w+: (-?\d+)"
+    )
+
+    for line in snmp_output_lines:
+        mac_match = mac_regex.match(line)
+        power_match = power_regex.match(line)
+
+        device_id_str = None
+        value_str = None
+        data_dict_to_update = None
+        value_parser = None
+        is_mac = False
+
+        if mac_match:
+            device_id_str = mac_match.group(1)
+            value_str = mac_match.group(2)
+            data_dict_to_update = mac_address_data
+            value_parser = format_mac
+            is_mac = True
+        elif power_match:
+            device_id_str = power_match.group(1)
+            value_str = power_match.group(2) # This is the numeric part as a string
+            data_dict_to_update = optical_power_data
+            # convert_power_to_dbm expects an int or float, regex captures string
+            value_parser = lambda x: convert_power_to_dbm(int(x))
+
+
+        if device_id_str and data_dict_to_update is not None and value_parser:
+            try:
+                device_id_int = int(device_id_str)
+                decoded_indices = decode_epon_device_index(device_id_int)
+
+                slot_id = decoded_indices["Slot ID"]
+                pon_id = decoded_indices["PON ID"]
+                onu_id = decoded_indices["ONU ID"]
+
+                frame_id = f"0/{slot_id}/{pon_id}/{onu_id}"
+                
+                parsed_value = value_parser(value_str)
+                data_dict_to_update[frame_id] = parsed_value
+
+            except ValueError:
+                print(f"Warning: Could not parse device ID '{device_id_str}' or value '{value_str}' for line: {line}")
+            except Exception as e:
+                print(f"Warning: Error processing line '{line}': {e}")
+
+    result_array = []
+    if mac_address_data:
+        result_array.append({"macAddress": mac_address_data})
+    if optical_power_data:
+        result_array.append({"ReceivedOpticalPower": optical_power_data})
+
+    return result_array
+
 async def main():
     target_ip = '10.12.1.13'
     community_string = 'faridsnmp'
@@ -154,10 +233,15 @@ async def main():
     
     # Call the function to get OLT information
     result = await get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand)
+    # Process the SNMP data
+    processed_data = process_snmp_data(result)
     
     # Print the result
-    for line in result:
-        print(line)
+    for item in processed_data:
+        for key, value in item.items():
+            print(f"{key}:")
+            for frame_id, parsed_value in value.items():
+                print(f"  {frame_id}: {parsed_value}")
         
 if __name__ == "__main__":
     asyncio.run(main())
