@@ -1,37 +1,38 @@
 from pysnmp.smi import view
 from pysnmp.hlapi.v3arch.asyncio import *
 import time
-from utils import load_mibs, format_mac, convert_power_to_dbm
+from utils import load_mibs, format_mac, convert_power_to_dbm, decode_epon_device_index
 import asyncio
-from convert import decode_epon_device_index
+from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA_EPON, CDATA_GPON, OCTETSTRING, HEX_STRING, OID, OID_SHORT, GAUGE, GAUGE32, INTEGER, STRING, COUNTER, COUNTER32, COUNTER64, TIMETICKS, IPADDRESS, NULL, FRAME_ID, SLOT_ID, PON_ID, ONU_ID
+import argparse
 
 olt_information = {
-    'mac': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.7'
+    MAC: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.7'
     },
-    'oper_status': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.8'
+    OPERATION_STATUS: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.8'
     },
-    'admin_status': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.9'
+    ADMIN_STATUS: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.9'
     },
-    'distance': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.15'
+    DISTANCE: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.15'
     },
-    'up_since': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.18'
+    UP_SINCE: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.18'
     },
-    'vendor': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.25'
+    VENDOR: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.25'
     },
-    'model': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.26'
+    MODEL: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.26'
     },
-    'sn': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.1.1.28'
+    SERIAL_NO: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.1.1.28'
     },
-    'power': {
-        'CDATA_EPON': '1.3.6.1.4.1.17409.2.3.4.2.1.4'
+    POWER: {
+        CDATA_EPON: '1.3.6.1.4.1.17409.2.3.4.2.1.4'
     } 
 }
 
@@ -40,29 +41,29 @@ def format_cdata_values(value, value_type):
     Format the value based on its type
     Args:
         value: The value to format.
-        value_type (str): The type of the value (e.g., "OCTETSTRING", "INTEGER").
+        value_type (str): The type of the value (e.g., OCTETSTRING, INTEGER).
     Returns:
         str: The formatted value as a string.
     """
-    if value_type == "OCTETSTRING":
+    if value_type == OCTETSTRING:
         # Check if the value is a printable string
         decoded_value = value.prettyPrint()
         if not decoded_value:  
             return '""'
         if not decoded_value.startswith("0x") and all(32 <= ord(char) <= 126 for char in decoded_value):
-            return f'STRING: "{decoded_value}"'
+            return f'{STRING}: "{decoded_value}"'
         else:
             hex_value = " ".join([f"{byte:02X}" for byte in value.asNumbers()])
-            return f'Hex-STRING: {hex_value}'
-    elif value_type == "OBJECTIDENTIFIER":
-        return f"OID: {value.prettyPrint()}"
-    elif value_type == "GAUGE32":
-        return f"Gauge32: {value}"
-    elif value_type == "COUNTER32":
-        return f"Counter32: {value}"
-    elif value_type == "COUNTER64":
-        return f"Counter64: {value}"
-    elif value_type == "TIMETICKS":
+            return f'{HEX_STRING}: {hex_value}'
+    elif value_type == OID:
+        return f"{OID_SHORT}: {value.prettyPrint()}"
+    elif value_type == GAUGE32:
+        return f"{GAUGE32}: {value}"
+    elif value_type == COUNTER32:
+        return f"{COUNTER32}: {value}"
+    elif value_type == COUNTER64:
+        return f"{Counter64}: {value}"
+    elif value_type == TIMETICKS:
         raw_ticks = int(value)
         days = raw_ticks // (24 * 60 * 60 * 100)
         hours = (raw_ticks // (60 * 60 * 100)) % 24
@@ -70,12 +71,12 @@ def format_cdata_values(value, value_type):
         seconds = (raw_ticks // 100) % 60
         milliseconds = raw_ticks % 100
         human_readable = f"{days} days, {hours}:{minutes:02}:{seconds:02}.{milliseconds:02}"
-        return f"Timeticks: ({raw_ticks}) {human_readable}"
-    elif value_type == "IPADDRESS":
-        return f"IpAddress: {value.prettyPrint()}"
-    elif value_type == "INTEGER":
-        return f"INTEGER: {value}"
-    elif value_type == "NULL":
+        return f"{TIMETICKS}: ({raw_ticks}) {human_readable}"
+    elif value_type == IPADDRESS:
+        return f"{IPADDRESS}: {value.prettyPrint()}"
+    elif value_type == INTEGER:
+        return f"{INTEGER}: {value}"
+    elif value_type == NULL:
         return '""'
     else:
         return f"{value_type}: {value.prettyPrint()}"
@@ -138,7 +139,7 @@ async def determine_olt_type(target_ip, community_string, port=161, version=0, r
     
     return determined_type
 
-async def get_olt_information(target_ip, community_string, port=161, version=0, retries = 3, timeout = 3, branch = 'mac', brand='CDATA_EPON'):
+async def get_olt_information(target_ip, community_string, port=161, version=0, retries = 3, timeout = 3, branch = MAC, brand=CDATA_EPON):
     """
     Perform an SNMP walk operation to retrieve OLT information.
     Args:
@@ -207,7 +208,7 @@ async def get_olt_information(target_ip, community_string, port=161, version=0, 
                 # Format the value based on its type
                 value_type = type(value).__name__.upper()
                 
-                if(brand == 'CDATA_EPON' or brand == 'CDATA_GPON'):
+                if(brand == CDATA_EPON or brand == CDATA_GPON):
                     formatted_value = format_cdata_values(value, value_type)
                 else:
                     formatted_value = f"{value_type}: {value.prettyPrint()}"
@@ -287,15 +288,15 @@ def process_cdata(snmp_output_lines, olt_type):
                 print(f"Warning: Skipping line with invalid value format (no ': ' separator): {line}")
                 continue
             
-            value_type_indicator = value_parts[0] # e.g., "Hex-STRING", "INTEGER", "Counter32"
+            value_type_indicator = value_parts[0] # e.g., "Hex-STRING", INTEGER, "Counter32"
             raw_value_str = value_parts[1]        # e.g., "A2 4F 02 18 E5 80", "-1280", "12345"
 
             # Decode device ID to frame ID using decode_epon_device_index
             device_id_int = int(device_id_str) # Can raise ValueError
             decoded_indices = decode_epon_device_index(device_id_int)
-            slot_id = decoded_indices["Slot ID"]
-            pon_id = decoded_indices["PON ID"]
-            onu_id = decoded_indices["ONU ID"]
+            slot_id = decoded_indices[SLOT_ID]
+            pon_id = decoded_indices[PON_ID]
+            onu_id = decoded_indices[ONU_ID]
             frame_id = f"{olt_type}0/{slot_id}/{pon_id}/{onu_id}"
 
             # Parse the value based on OID key and value type
@@ -307,18 +308,18 @@ def process_cdata(snmp_output_lines, olt_type):
                 except ValueError:
                     print(f"Warning: Could not parse power value '{raw_value_str}' as int for line: {line}")
                     parsed_value = raw_value_str # Fallback
-            elif value_type_indicator == "Hex-STRING":
+            elif value_type_indicator == HEX_STRING:
                 # As per prompt, other Hex-STRINGs are formatted like MAC (e.g. ONU SN, MAC)
                 parsed_value = format_mac(raw_value_str)
-            elif value_type_indicator.startswith("INTEGER") or \
-                 value_type_indicator.startswith("GAUGE") or \
-                 value_type_indicator.startswith("COUNTER"):
+            elif value_type_indicator.startswith(INTEGER) or \
+                 value_type_indicator.startswith(GAUGE) or \
+                 value_type_indicator.startswith(COUNTER):
                 try:
                     # For simple numeric types (INTEGER, COUNTER, GAUGE), try to convert to int
                     parsed_value = int(raw_value_str)
                 except ValueError:
                     parsed_value = raw_value_str # Fallback if not a simple int
-            elif value_type_indicator == "STRING":
+            elif value_type_indicator == STRING:
                 # For STRING type, remove surrounding quotes if present (e.g. "some value" -> some value)
                 parsed_value = raw_value_str.strip('"')
             else:
@@ -348,43 +349,95 @@ def process_snmp_data(snmp_output_lines, brand, olt_type):
     
     Args:
         snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
-        brand (str): The brand of the device (e.g., 'CDATA_EPON').
+        brand (str): The brand of the device (e.g., CDATA_EPON).
         olt_type (str): The type of OLT, either 'epon' or 'gpon'.
     
     Returns:
         list: A list of dictionaries with processed data.
     """
-    if brand == 'CDATA_EPON' or brand == 'CDATA_GPON':
+    if brand == CDATA_EPON or brand == CDATA_GPON:
         return process_cdata(snmp_output_lines, olt_type)
     else:
         print(f"Unsupported brand: {brand}")
         return []
 
 async def main():
-    target_ip = '10.12.1.13'
-    community_string = 'faridsnmp'
-    port = 161
-    version = 0
-    retries = 3
-    timeout = 3
-    branch = 'mac'
+    # Define a mapping from string names (used in CLI) to the actual enum constants for branches
+    # This assumes your enums.py has these constants and olt_information uses them as keys.
+    branch_name_to_constant_map = {
+        "MAC": MAC,
+        "OPERATION_STATUS": OPERATION_STATUS,
+        "ADMIN_STATUS": ADMIN_STATUS,
+        "DISTANCE": DISTANCE,
+        "UP_SINCE": UP_SINCE,
+        "VENDOR": VENDOR,
+        "MODEL": MODEL,
+        "SERIAL_NO": SERIAL_NO,
+        "POWER": POWER,
+    }
+
+    parser = argparse.ArgumentParser(description="SNMP OLT Information Retriever")
+    parser.add_argument("--ip", required=True, help="Target OLT IP address")
+    parser.add_argument("--community", required=True, help="SNMP community string")
+    parser.add_argument("--port", type=int, default=161, help="SNMP port (default: 161)")
+    parser.add_argument("--branch", default="MAC", choices=list(branch_name_to_constant_map.keys()),
+                        help="OID branch to query (default: MAC)")
+    parser.add_argument("--brand-prefix", default="CDATA",
+                        help="Brand prefix, e.g., CDATA. _EPON or _GPON will be appended based on detected OLT type (default: CDATA)")
+    parser.add_argument("--version", type=int, default=0, choices=[0, 1], help="SNMP version (0 for v1, 1 for v2c; default: 0)")
+    parser.add_argument("--retries", type=int, default=3, help="SNMP retries (default: 3)")
+    parser.add_argument("--timeout", type=int, default=3, help="SNMP timeout in seconds (default: 3)")
+
+    args = parser.parse_args()
+
+    target_ip = args.ip
+    community_string = args.community
+    port = args.port
+    selected_branch_name = args.branch
+    brand_prefix = args.brand_prefix
+    snmp_version = args.version
+    snmp_retries = args.retries
+    snmp_timeout = args.timeout
     
+    selected_branch_constant = branch_name_to_constant_map.get(selected_branch_name)
+    if selected_branch_constant is None:
+        print(f"Error: Invalid branch name '{selected_branch_name}'.")
+        return
+
     # Get OLT type
-    olt_type = await determine_olt_type(target_ip, community_string, port, version, retries, timeout)
-    
-    brand = f'CDATA_{olt_type.upper()}'
-    
+    print(f"Determining OLT type for {target_ip}...")
+    olt_type = await determine_olt_type(target_ip, community_string, port, snmp_version, snmp_retries, snmp_timeout)
+    print(f"Determined OLT Type: {olt_type}")
+
+    if olt_type == "unknown":
+        print(f"Error: Could not determine OLT type for {target_ip}. Aborting.")
+        return
+
+    # Construct the dynamic brand string key (e.g., "CDATA_EPON")
+    dynamic_brand_str_key = f"{brand_prefix.upper()}_{olt_type.upper()}"
+
+    print(f"Querying branch '{selected_branch_name}' for brand '{dynamic_brand_str_key}'")
+
     # Call the function to get OLT information
-    result = await get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand)
+    result = await get_olt_information(
+        target_ip, community_string, port, snmp_version, snmp_retries, snmp_timeout,
+        branch=selected_branch_constant,  # Use the mapped constant
+        brand=dynamic_brand_str_key    # Use the mapped constant
+    )
     
     # Process the SNMP data
-    processed_data = process_snmp_data(result, brand, olt_type)
+    # The 'brand' argument for process_snmp_data is used to check if it's CDATA_EPON or CDATA_GPON
+    processed_data = process_snmp_data(result, brand=dynamic_brand_str_key, olt_type=olt_type)
     
     # Print the result
+    if not processed_data:
+        print("No data processed.")
     for item in processed_data:
-        for key, value in item.items():
-            print(f"{key}:")
-            for frame_id, parsed_value in value.items():
+        for key, value_map in item.items():
+            print(f"\n--- {key} ---")
+            if not value_map:
+                print("  No entries found.")
+            for frame_id, parsed_value in value_map.items():
                 print(f"  {frame_id}: {parsed_value}")
         
 if __name__ == "__main__":

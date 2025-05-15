@@ -11,8 +11,8 @@ def decode_epon_device_index(device_id):
     }
 
 
-device_id = 786436
-decoded = decode_epon_device_index(device_id)
-print("Main: epon0/2/1, ONU ID: 20")
-for k, v in decoded.items():
-    print(f"{k}: {v}")
+# device_id = 786436
+# decoded = decode_epon_device_index(device_id)
+# print("Main: epon0/2/1, ONU ID: 20")
+# for k, v in decoded.items():
+#     print(f"{k}: {v}")

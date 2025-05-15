@@ -6,6 +6,7 @@ import time
 import os
 from enums import COMPILED_MIBS
 import cx_Oracle
+from enums import SLOT_ID, PON_ID, ONU_ID
 
 # Function to load MIBs
 def load_mibs():
@@ -165,6 +166,19 @@ def convert_power_to_dbm(power_value):
     # Optical power is typically stored in units of 0.1 dBm or 0.01 dBm
     # The value -2268 suggests units of 0.01 dBm, hence division by 100.
     return float(power_value) / 100.0  # Divide by 100 for dBm value
+
+# Function to decode EPON device index
+def decode_epon_device_index(device_id):
+    # Extract the raw bytes
+    slot = (device_id >> 24) & 0xFF
+    pon = (device_id >> 8) & 0xFF
+    onu = device_id & 0xFF
+
+    return {
+        SLOT_ID: slot,
+        PON_ID: (pon // 16) + 1,
+        ONU_ID: onu,
+    }
 
 # Function to parse SNMP output and extract ONU data
 def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal 'data' variables
