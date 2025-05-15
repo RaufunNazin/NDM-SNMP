@@ -6,10 +6,6 @@ import asyncio
 from convert import decode_epon_device_index
 
 olt_information = {
-    """
-    OLT information OIDs for different branches and brands.
-    The keys are the branch names, and the values are dictionaries
-    """
     'mac': {
         'CDATA': '1.3.6.1.4.1.17409.2.3.4.1.1.7'
     },
