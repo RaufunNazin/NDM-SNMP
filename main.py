@@ -41,6 +41,7 @@ async def main():
     print(f"Target IP: {target_ip}")
     print(f"Community String: {community_string}")
     print(f"OID to walk: {oid_to_walk}")
+    print(f"Port: {port}")
     print(f"SNMP Version: {'SNMPv1' if snmp_version == 0 else 'SNMPv2c'}")
     print(f"Timeout: {snmp_timeout} seconds")
     print(f"Retries: {snmp_retries}")
