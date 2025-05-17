@@ -88,7 +88,7 @@ def format_snmp_output_value(value, value_type):
         return f"{value_type}: {value.prettyPrint()}"
 
 # Perform SNMP Walk using async walk_cmd
-async def snmp_walk(ip, community, oid, port, snmp_version=0, snmp_timeout=3, snmp_retries=3):
+async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_retries):
     result = []
     # Start timing
     start_time = time.time()
