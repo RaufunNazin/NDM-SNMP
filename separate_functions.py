@@ -91,25 +91,24 @@ def format_cdata_values(value, value_type):
     else:
         return f"{value_type}: {value.prettyPrint()}"
     
-async def determine_olt_type(target_ip, community_string, brand, port, version, retries, timeout, snmp_engine):
+async def determine_olt_type(target_ip, community_string, port, brand, version, retries, timeout):
     """
     Determines OLT type (epon/gpon) by walking ifDescr.
     Args:
         target_ip (str): The IP address of the target device.
         community_string (str): The SNMP community string.
         port (int): SNMP port.
+        brand (str): The brand of the device.
         version (int): SNMP version.
         retries (int): SNMP retries.
         timeout (int): SNMP timeout.
-        snmp_engine (SnmpEngine, optional): An existing SnmpEngine instance. Defaults to None, creating a new one.
-        brand (str): The brand of the device.
     Returns:
         str: "epon", "gpon", or "unknown".
     """
     if_descr_oid = '1.3.6.1.2.1.2.2.1.2'  # ifDescr
     determined_type = "unknown"
 
-    engine = snmp_engine or SnmpEngine()
+    engine = SnmpEngine()
     
     try:
         async for errorIndication, errorStatus, errorIndex, varBinds in walk_cmd(
@@ -435,6 +434,7 @@ async def main():
         version=snmp_version,
         retries=snmp_retries,
         timeout=snmp_timeout
+        snmp_engine=
     )
     print(f"Determined OLT Type: {olt_type}")
 
