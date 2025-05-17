@@ -434,7 +434,6 @@ async def main():
         version=snmp_version,
         retries=snmp_retries,
         timeout=snmp_timeout
-        snmp_engine=
     )
     print(f"Determined OLT Type: {olt_type}")
 
