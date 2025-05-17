@@ -1,5 +1,5 @@
 import asyncio
-from pysnmp.hlapi.v3arch.asyncio import *
+from pysnmp.hlapi.asyncio import *
 import os
 from dotenv import load_dotenv
 import argparse

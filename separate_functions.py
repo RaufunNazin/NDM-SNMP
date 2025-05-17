@@ -1,5 +1,5 @@
 from pysnmp.smi import view
-from pysnmp.hlapi.v3arch.asyncio import *
+from pysnmp.hlapi.asyncio import *
 import time
 from utils import load_mibs, format_mac, convert_power_to_dbm, decode_epon_device_index
 import asyncio
