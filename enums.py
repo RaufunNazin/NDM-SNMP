@@ -11,6 +11,7 @@ MODEL = 'model'
 SERIAL_NO = 'serial_number'
 POWER = 'power'
 
+CDATA='CDATA'
 CDATA_EPON = 'CDATA_EPON'
 CDATA_GPON = 'CDATA_GPON'
 
