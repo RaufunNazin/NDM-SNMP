@@ -13,6 +13,7 @@ load_dotenv()
 target_ip = os.getenv("TARGET_IP")
 community_string = os.getenv("COMMUNITY_STRING")
 oid_to_walk = os.getenv("OID_TO_WALK")
+port = int(os.getenv("PORT", 161))
 snmp_version = 0 if(os.getenv("SNMP_VERSION") == "1") else 1 # 0 = SNMPv1, 1 = SNMPv2c
 snmp_timeout = int(os.getenv("SNMP_TIMEOUT", 3))
 snmp_retries = int(os.getenv("SNMP_RETRIES", 3))
@@ -43,7 +44,7 @@ async def main():
     print(f"SNMP Version: {'SNMPv1' if snmp_version == 0 else 'SNMPv2c'}")
     print(f"Timeout: {snmp_timeout} seconds")
     print(f"Retries: {snmp_retries}")
-    snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, snmp_version, snmp_timeout, snmp_retries)
+    snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, port, snmp_version, snmp_timeout, snmp_retries)
     
     snmp_data_str = "\n".join(snmp_output)
     
