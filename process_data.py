@@ -59,7 +59,7 @@ def process_cdata(snmp_output_lines, olt_type):
             #     print(oid_components, oid_components[1])
             #     continue
             print(f"oid_components: {oid_components}")
-            print(f"oid_components 2nd item: {oid_components[1]}")
+            print(f"parts: {parts}")
             device_id_str = oid_components[1] # IndexID
 
             # Extract value type indicator (e.g., "Hex-STRING") and raw value string
