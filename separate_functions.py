@@ -105,7 +105,7 @@ async def main():
         timeout=snmp_timeout,
         branch=selected_branch_constant,
         brand=dynamic_brand_str_key,
-        index_str=interface_index_str
+        onu_index_str=interface_index_str
     )
     
     # Process the SNMP data

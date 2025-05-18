@@ -110,7 +110,7 @@ async def get_olt_type(target_ip, community_string, port, brand, version, retrie
     
     return determined_type
 
-async def get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand, index_str):
+async def get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand, onu_index_str):
     """
     Perform an SNMP walk operation to retrieve OLT information.
     Args:
@@ -122,7 +122,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         timeout (int): Timeout in seconds for SNMP requests.
         branch (str): The branch of OLT information to retrieve.
         brand (str): The brand of the device.
-        index_str (str): The specific interface index string to query (e.g., "gpon0/0/1/12").
+        onu_index_str (str): The specific interface index string to query (e.g., "gpon0/0/1/12").
     Returns:
         list: A list of strings containing the OLT information.
     """
@@ -134,9 +134,9 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
     mib_builder = load_mibs()
     mib_view = view.MibViewController(mib_builder)
     
-    if index_str is not None:
+    if onu_index_str is not None:
         # If an index is provided
-        index = encode_index_from_string(index_str, brand)
+        index = encode_index_from_string(onu_index_str, brand)
         oid_to_walk = f'{oid_dictionary[branch][brand]}.{index}'
     else:
         oid_to_walk = oid_dictionary[branch][brand]
