@@ -128,7 +128,7 @@ def resolve_oid(oid, mib_view):
             return oid.prettyPrint()
 
 
-async def get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand, onu_index_str):
+async def get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand, onu_index_str, card_id):
     """
     Perform an SNMP walk or get operation to retrieve OLT information.
     Returns all resolved OIDs and values as strings.
@@ -142,7 +142,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
 
     # Prepare OID
     if onu_index_str:
-        index = encode_index_from_string(onu_index_str, brand)
+        index = encode_index_from_string(onu_index_str, brand, card_id)
         oid_to_query = f'{oid_dictionary[branch][brand]}.{index}'
     else:
         oid_to_query = oid_dictionary[branch][brand]

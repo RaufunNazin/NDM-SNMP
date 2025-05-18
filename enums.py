@@ -35,5 +35,6 @@ NULL = 'NULL'
 
 FRAME_ID = 'frame_id'
 SLOT_ID = 'slot_id'
+CARD_ID = 'card_id'
 PON_ID = 'pon_id'
 ONU_ID = 'onu_id'

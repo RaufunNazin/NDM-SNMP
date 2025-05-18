@@ -31,7 +31,7 @@ def _parse_interface_string(interface_string: str):
     
     return type_str, frame_id, slot_id, pon_id, onu_id
 
-def encode_cdata_epon_index(slot_id: int, pon_id: int, onu_id: int) -> int:
+def encode_cdata_epon_index(slot_id: int, card_id:int, pon_id: int, onu_id: int) -> int:
     """
     Encodes CDATA EPON slot, PON, and ONU IDs into a device_id integer.
     This is the reverse of the decoding logic in decode_cdata_epon.
@@ -59,13 +59,14 @@ def encode_cdata_epon_index(slot_id: int, pon_id: int, onu_id: int) -> int:
         raise ValueError(f"EPON ONU ID {onu_id} out of range [0, 255].")
 
     raw_slot_byte = slot_id
+    raw_card_byte = card_id
     raw_pon_byte = (pon_id - 1) * 16
     raw_onu_byte = onu_id
     
-    device_id = (raw_slot_byte << 24) | (raw_pon_byte << 8) | raw_onu_byte
+    device_id = (raw_slot_byte << 24) | (raw_card_byte << 16) | (raw_pon_byte << 8) | raw_onu_byte
     return device_id
 
-def encode_cdata_gpon_index(slot_id: int, pon_id: int, onu_id: int) -> int:
+def encode_cdata_gpon_index(slot_id: int, card_id:int, pon_id: int, onu_id: int) -> int:
     """
     Encodes CDATA GPON slot, PON, and ONU IDs into a device_id integer.
     This is the reverse of the decoding logic in decode_cdata_gpon.
@@ -97,13 +98,14 @@ def encode_cdata_gpon_index(slot_id: int, pon_id: int, onu_id: int) -> int:
         raise ValueError(f"GPON ONU ID {onu_id} out of range [0, 255].")
 
     raw_slot_byte = slot_id + 1 
+    raw_card_byte = card_id
     raw_pon_byte = pon_id + 6
     raw_onu_byte = onu_id
     
-    device_id = (raw_slot_byte << 24) | (raw_pon_byte << 8) | raw_onu_byte
+    device_id = (raw_slot_byte << 24) | (raw_card_byte << 16) | (raw_pon_byte << 8) | raw_onu_byte
     return device_id
 
-def encode_index_from_string(interface_string: str, brand) -> int:
+def encode_index_from_string(interface_string: str, brand, card_id) -> int:
     """
     Encodes an interface string (e.g., "epon0/0/1/24" or "gpon0/2/4/14") 
     into a device_id integer. The frame_id part of the string is parsed but
@@ -124,9 +126,9 @@ def encode_index_from_string(interface_string: str, brand) -> int:
     # as per the structure of the original decoders.
     
     if brand == CDATA_EPON:
-            return encode_cdata_epon_index(slot_id, pon_id, onu_id)
+            return encode_cdata_epon_index(slot_id, card_id, pon_id, onu_id)
     elif brand == CDATA_GPON:
-            return encode_cdata_gpon_index(slot_id, pon_id, onu_id)
+            return encode_cdata_gpon_index(slot_id, card_id, pon_id, onu_id)
     else:
         # This case should ideally be caught by _parse_interface_string's regex
         raise ValueError(f"Unknown interface type: {type_str}")

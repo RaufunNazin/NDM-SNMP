@@ -1,6 +1,6 @@
 from utils import format_mac, convert_power_to_dbm
 from index_decoder import decode_cdata_epon, decode_cdata_gpon
-from enums import HEX_STRING, GAUGE, INTEGER, STRING, COUNTER, NULL, SLOT_ID, PON_ID, ONU_ID, EPON_LOWER, GPON_LOWER
+from enums import HEX_STRING, GAUGE, INTEGER, STRING, COUNTER, NULL, SLOT_ID, CARD_ID, PON_ID, ONU_ID, EPON_LOWER, GPON_LOWER
 from datetime import datetime, timedelta
 
 def process_cdata(snmp_output_lines, olt_type):
@@ -83,9 +83,10 @@ def process_cdata(snmp_output_lines, olt_type):
                 decoded_indices = decode_cdata_gpon(device_id_int)
             frame_id = 0
             slot_id = decoded_indices[SLOT_ID]
+            card_id = decoded_indices[CARD_ID]
             pon_id = decoded_indices[PON_ID]
             onu_id = decoded_indices[ONU_ID]
-            frame_id = f"{olt_type}{frame_id}/{slot_id}/{pon_id}/{onu_id}"
+            frame_id = f"{olt_type}{frame_id}/{slot_id}/{pon_id}/{onu_id}->{device_id_str}:{card_id}"
 
             # Parse the value based on OID key and value type
             parsed_value = None

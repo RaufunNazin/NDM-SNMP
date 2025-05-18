@@ -55,6 +55,7 @@ async def main():
                         help="Specific interface index string to query (e.g., 'gpon0/0/1/12'). "
                              "If provided, performs an SNMP GET for this specific index.")
     parser.add_argument("-s", type=str, default=None, help="Specify if the outputs should be stored or not and add the file name")
+    parser.add_argument("-cr", type=int, default=None, help="ONU Card ID/ required to encode to onuDeviceIndex")
 
     args = parser.parse_args()
 
@@ -68,6 +69,7 @@ async def main():
     snmp_timeout = args.t
     interface_index_str = args.idx
     store_output = args.s
+    card_id = args.cr
     
     selected_branch_constant = branches.get(selected_branch_name)
     if selected_branch_constant is None:
@@ -106,7 +108,8 @@ async def main():
         timeout=snmp_timeout,
         branch=selected_branch_constant,
         brand=dynamic_brand_str_key,
-        onu_index_str=interface_index_str
+        onu_index_str=interface_index_str,
+        card_id=card_id
     )
     
     # Process the SNMP data
