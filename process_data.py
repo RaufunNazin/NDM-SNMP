@@ -56,6 +56,7 @@ def process_cdata(snmp_output_lines, olt_type):
             # The component after the object name should be the numeric device ID
             if len(oid_components) < 2 or not oid_components[1].isdigit():
                 print(f"Warning: Could not extract valid numeric device ID from OID '{oid_full_str}' in line: {line}")
+                print(oid_components, oid_components[1])
                 continue
             device_id_str = oid_components[1] # IndexID
 

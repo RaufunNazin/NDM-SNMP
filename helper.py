@@ -266,5 +266,5 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
 
     end_time = time.time()
     print(f"Elapsed time: {end_time - start_time:.2f} seconds")
-    print(f"SNMP {action_description} completed. Processed {len(result)} entries (data/messages).")
+    print(f"SNMP {action_description} completed. Processed {len(result)} entries.")
     return result
