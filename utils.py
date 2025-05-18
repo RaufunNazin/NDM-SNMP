@@ -6,12 +6,12 @@ import time
 import os
 from enums import COMPILED_MIBS
 import cx_Oracle
-from enums import SLOT_ID, PON_ID, ONU_ID
 
 # Function to load MIBs
 def load_mibs():
     """Load MIBs from both compiled directory and source directory"""
     print("Loading MIBs...")
+    start_time = time.time()
     mib_builder = builder.MibBuilder()
     
     # Add compiled MIBs directory first (higher priority)
@@ -37,7 +37,9 @@ def load_mibs():
             mib_builder.load_modules(mib)
         except Exception as e:
             print(f"Warning: Could not load MIB {mib}: {e}")
-    
+    end_time = time.time()
+    print(f"Elapsed time: {end_time - start_time:.2f} seconds")
+    print(f"MIB Load complete.")
     return mib_builder
 
 def parse_onu_device_index(index: int):
