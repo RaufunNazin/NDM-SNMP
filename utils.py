@@ -7,39 +7,53 @@ import os
 from enums import COMPILED_MIBS
 import cx_Oracle
 
+# Cache singleton
+_mib_cache = None
+
+# Required MIBs mapping (add as needed)
+BRAND_MIB_MAP = {
+    "mikrotik": ['MIKROTIK-MIB', 'IF-MIB', 'SNMPv2-MIB'],
+    "cdata": ['CDATA-EPON-MIB', 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI', 'IF-MIB'],
+    "nscrtv": ['NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB', 'IF-MIB'],
+    "default": ['IF-MIB', 'SNMPv2-MIB', 'RFC1213-MIB'],
+}
+
 # Function to load MIBs
-def load_mibs():
-    """Load MIBs from both compiled directory and source directory"""
+def load_mibs(brand=None):
+    """Load and cache MIBs based on brand; fallback to all if unknown"""
+    global _mib_cache
+    if _mib_cache:
+        return _mib_cache
+
     print("Loading MIBs...")
     start_time = time.time()
+
     mib_builder = builder.MibBuilder()
-    
-    # Add compiled MIBs directory first (higher priority)
+
+    # Directories
     compiled_mib_dir = COMPILED_MIBS
     if os.path.exists(compiled_mib_dir):
         mib_builder.add_mib_sources(builder.DirMibSource(compiled_mib_dir))
-    
-    
-    # Also add source MIBs directory as last resort
+    else:
+        raise FileNotFoundError(f"Compiled MIB path not found: {compiled_mib_dir}")
+
+    # Also include source MIBs as fallback if needed
     source_mib_dir = 'mibs'
-    mib_builder.add_mib_sources(builder.DirMibSource(source_mib_dir))
-    
-    # Try to load important MIBs
-    core_mibs = [
-    'SNMPv2-MIB', 'SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF', 
-    'RFC1213-MIB', 'IF-MIB', 'IP-MIB', 'MIKROTIK-MIB',
-    'IANAifType-MIB', 'BRIDGE-MIB', 'HOST-RESOURCES-MIB', 
-    'ENTITY-MIB', 'IEEE802dot11-MIB', 'IANA-ENTITY-MIB', 'RMON-MIB', 'CDATA-EPON-MIB', 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI', 'NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB'
-    ]
-    
-    for mib in core_mibs:
+    if os.path.exists(source_mib_dir):
+        mib_builder.add_mib_sources(builder.DirMibSource(source_mib_dir))
+
+    # Choose MIBs to load
+    mibs_to_load = BRAND_MIB_MAP.get(brand.lower(), BRAND_MIB_MAP["default"]) if brand else BRAND_MIB_MAP["default"]
+
+    for mib in mibs_to_load:
         try:
             mib_builder.load_modules(mib)
         except Exception as e:
             print(f"Warning: Could not load MIB {mib}: {e}")
-    end_time = time.time()
-    print(f"Elapsed time: {end_time - start_time:.2f} seconds")
-    print(f"MIB Load complete.")
+
+    _mib_cache = mib_builder
+
+    print(f"MIB Load complete in {time.time() - start_time:.2f} seconds.")
     return mib_builder
 
 def parse_onu_device_index(index: int):
