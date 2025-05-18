@@ -292,13 +292,16 @@ def process_cdata(snmp_output_lines, olt_type):
 
             # Extract value type indicator (e.g., "Hex-STRING") and raw value string
             # Example value_full_str: "Hex-STRING: A2 4F 02 18 E5 80" or "INTEGER: -1280"
-            value_parts = value_full_str.split(": ", 1)
-            if len(value_parts) != 2:
-                print(f"Warning: Skipping line with invalid value format (no ': ' separator): {line}")
-                continue
-            
-            value_type_indicator = value_parts[0] # e.g., "Hex-STRING", INTEGER, "Counter32"
-            raw_value_str = value_parts[1]        # e.g., "A2 4F 02 18 E5 80", "-1280", "12345"
+            if value_parts.contains(": "):
+                value_parts = value_full_str.split(": ", 1)
+                if len(value_parts) != 2:
+                    print(f"Warning: Skipping line with invalid value format (no ': ' separator): {line}")
+                    continue
+                
+                value_type_indicator = value_parts[0] # e.g., "Hex-STRING", INTEGER, "Counter32"
+                raw_value_str = value_parts[1]        # e.g., "A2 4F 02 18 E5 80", "-1280", "12345"
+            else:
+                raw_value_str = value_full_str
 
             # Decode device ID to Logical ID using decode function
             device_id_int = int(device_id_str) # Can raise ValueError
