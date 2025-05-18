@@ -134,13 +134,9 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
     mib_builder = load_mibs()
     mib_view = view.MibViewController(mib_builder)
     
-    if index_str:
+    if index_str is not None:
         # If an index is provided
         index = encode_index_from_string(index_str, brand)
-        if index is None:
-            error_msg = f"Error: Could not encode provided index string '{index_str}' for brand '{brand}'. Invalid index."
-            print(error_msg)
-            return [error_msg]
         oid_to_walk = f'{oid_dictionary[branch][brand]}.{index}'
     else:
         oid_to_walk = oid_dictionary[branch][brand]
