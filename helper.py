@@ -171,7 +171,8 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         else:
             varBindList = varBinds
     else:
-        objects = next_cmd(
+        # Use nextCmd (async iterator)
+        objects = await next_cmd(
             snmp_engine,
             community,
             transport,
