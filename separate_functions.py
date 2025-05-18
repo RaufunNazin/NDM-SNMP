@@ -54,16 +54,16 @@ async def main():
 
     args = parser.parse_args()
 
-    target_ip = args.ip
-    community_string = args.community
-    port = args.port
-    selected_branch_name = args.branch
-    brand_prefix = args.brand_prefix
-    snmp_version = args.version
-    snmp_retries = args.retries
-    snmp_timeout = args.timeout
+    target_ip = args.i
+    community_string = args.c
+    port = args.p
+    selected_branch_name = args.bc
+    brand_prefix = args.bd
+    snmp_version = args.v
+    snmp_retries = args.r
+    snmp_timeout = args.t
     
-    selected_branch_constant = branch_name_to_constant_map.get(selected_branch_name)
+    selected_branch_constant = branches.get(selected_branch_name)
     if selected_branch_constant is None:
         print(f"Error: Invalid branch name '{selected_branch_name}'.")
         return
