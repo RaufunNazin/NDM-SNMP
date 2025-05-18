@@ -5,6 +5,7 @@ from utils import load_mibs
 from enums import OCTETSTRING, HEX_STRING, OID, OID_SHORT, GAUGE32, INTEGER, STRING, COUNTER32, COUNTER64, TIMETICKS, IPADDRESS, NULL, CDATA, EPON_LOWER, GPON_LOWER, PON_LOWER
 from oid_dict import oid_dictionary, IFDESCR
 from index_encoder import encode_index_from_string
+from snmp_session import get_snmp_session
 
 def format_raw_values(value, value_type):
     """
@@ -145,10 +146,9 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
     else:
         oid_to_query = oid_dictionary[branch][brand]
 
-    transport = await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries)
-    snmp_engine = SnmpEngine()
-    community = CommunityData(community_string, mpModel=version)
-    context = ContextData()
+    snmp_engine, community, transport, context = await get_snmp_session(
+        target_ip, port, community_string, version, timeout, retries
+    )
 
     print(f"{'Starting SNMP get' if onu_index_str else 'Starting SNMP walk'} for OID: {oid_to_query}")
 
