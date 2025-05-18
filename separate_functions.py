@@ -111,9 +111,7 @@ async def main():
     
     # Process the SNMP data
     # The 'brand' argument for process_snmp_data is used to check if it's CDATA_EPON or CDATA_GPON
-    print(result)
     processed_data = process_snmp_data(result, brand=dynamic_brand_str_key, olt_type=olt_type)
-    print(processed_data)
     
     if store_output:
         # Store the output in a file
@@ -126,17 +124,17 @@ async def main():
                     for frame_id, parsed_value in value_map.items():
                         f.write(f"  {frame_id}: {parsed_value}\n")
         print(f"Output stored in {store_output}")
-    
-    # Print the result
-    if not processed_data:
-        print("No data processed.")
-    for item in processed_data:
-        for key, value_map in item.items():
-            print(f"\n--- {key} ---")
-            if not value_map:
-                print("  No entries found.")
-            for frame_id, parsed_value in value_map.items():
-                print(f"  {frame_id}: {parsed_value}")
+    else:
+        # Print the result
+        if not processed_data:
+            print("No data processed.")
+        for item in processed_data:
+            for key, value_map in item.items():
+                print(f"\n--- {key} ---")
+                if not value_map:
+                    print("  No entries found.")
+                for frame_id, parsed_value in value_map.items():
+                    print(f"  {frame_id}: {parsed_value}")
         
 if __name__ == "__main__":
     asyncio.run(main())
