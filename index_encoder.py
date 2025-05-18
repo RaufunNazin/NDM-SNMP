@@ -1,5 +1,5 @@
 import re
-from enums import EPON_LOWER, GPON_LOWER, CDATA
+from enums import CDATA_EPON, CDATA_GPON
 
 def _parse_interface_string(interface_string: str):
     """
@@ -123,11 +123,9 @@ def encode_index_from_string(interface_string: str, brand) -> int:
     # _frame_id is parsed but not used in the device_id encoding itself,
     # as per the structure of the original decoders.
     
-    if type_str == EPON_LOWER:
-        if brand == CDATA:
+    if brand == CDATA_EPON:
             return encode_cdata_epon_index(slot_id, pon_id, onu_id)
-    elif type_str == GPON_LOWER:
-        if brand == CDATA:
+    elif brand == CDATA_GPON:
             return encode_cdata_gpon_index(slot_id, pon_id, onu_id)
     else:
         # This case should ideally be caught by _parse_interface_string's regex
