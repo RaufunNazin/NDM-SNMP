@@ -102,7 +102,7 @@ async def get_olt_type(target_ip, community_string, port, brand, version, retrie
                             determined_type = EPON_LOWER
                             return determined_type  # Found, can exit early
                         elif GPON_LOWER in descr or PON_LOWER in descr:
-                            determined_type = EPON_LOWER
+                            determined_type = GPON_LOWER
                             return determined_type  # Found, can exit early
     except Exception as e:
         print(f"Exception during OLT type determination: {e}")

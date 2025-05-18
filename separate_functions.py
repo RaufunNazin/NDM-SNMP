@@ -1,5 +1,5 @@
 import asyncio
-from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA_EPON, CDATA_GPON
+from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA, CDATA_EPON, CDATA_GPON
 import argparse
 from helper import get_olt_type, get_olt_information
 from process_data import process_cdata
@@ -24,42 +24,46 @@ def process_snmp_data(snmp_output_lines, brand, olt_type):
 
 async def main():
     # Define a mapping from string names (used in CLI) to the actual enum constants for branches
-    branch_name_to_constant_map = {
-        "MAC": MAC,
-        "OPERATION_STATUS": OPERATION_STATUS,
-        "ADMIN_STATUS": ADMIN_STATUS,
-        "DISTANCE": DISTANCE,
-        "UP_SINCE": UP_SINCE,
-        "VENDOR": VENDOR,
-        "MODEL": MODEL,
-        "SERIAL_NO": SERIAL_NO,
-        "POWER": POWER,
+    branches = {
+    "MAC": MAC,
+    "OPERATION_STATUS": OPERATION_STATUS,
+    "ADMIN_STATUS": ADMIN_STATUS,
+    "DISTANCE": DISTANCE,
+    "UP_SINCE": UP_SINCE,
+    "VENDOR": VENDOR,
+    "MODEL": MODEL,
+    "SERIAL_NO": SERIAL_NO,
+    "POWER": POWER,
+    }
+    
+    supported_brands = {
+        "CDATA": CDATA
     }
 
     parser = argparse.ArgumentParser(description="SNMP OLT Information Retriever")
-    parser.add_argument("--ip", required=True, help="Target OLT IP address")
-    parser.add_argument("--community", required=True, help="SNMP community string")
-    parser.add_argument("--port", type=int, default=161, help="SNMP port (default: 161)")
-    parser.add_argument("--branch", default=MAC, choices=list(branch_name_to_constant_map.keys()),
+    parser.add_argument("-i", required=True, help="Target OLT IP address")
+    parser.add_argument("-c", required=True, help="SNMP community string")
+    parser.add_argument("-p", type=int, default=161, help="SNMP port (default: 161)")
+    parser.add_argument("-bc", required=True, choices=list(branches.keys()),
                         help="OID branch to query (default: mac)")
-    parser.add_argument("--brand-prefix", default="CDATA",
+    parser.add_argument("-bd", required=True, choices=list(supported_brands.keys()),
                         help="Brand prefix, e.g., CDATA. _EPON or _GPON will be appended based on detected OLT type (default: CDATA)")
-    parser.add_argument("--version", type=int, default=0, choices=[0, 1], help="SNMP version (0 for v1, 1 for v2c; default: 0)")
-    parser.add_argument("--retries", type=int, default=3, help="SNMP retries (default: 3)")
-    parser.add_argument("--timeout", type=int, default=3, help="SNMP timeout in seconds (default: 3)")
+    parser.add_argument("-v", type=int, default=0, choices=[0, 1], help="SNMP version (0 for v1, 1 for v2c; default: 0)")
+    parser.add_argument("-r", type=int, default=3, help="SNMP retries (default: 3)")
+    parser.add_argument("-t", type=int, default=3, help="SNMP timeout in seconds (default: 3)")
 
     args = parser.parse_args()
 
-    target_ip = args.ip
-    community_string = args.community
-    port = args.port
-    selected_branch_name = args.branch
-    brand_prefix = args.brand_prefix
-    snmp_version = args.version
-    snmp_retries = args.retries
-    snmp_timeout = args.timeout
+    target_ip = args.i
+    community_string = args.c
+    port = args.p
+    selected_branch_name = args.bc
+    brand_prefix = args.bd
+    snmp_version = args.v
+    snmp_retries = args.r
+    snmp_timeout = args.t
     
-    selected_branch_constant = branch_name_to_constant_map.get(selected_branch_name)
+    selected_branch_constant = branches.get(selected_branch_name)
     if selected_branch_constant is None:
         print(f"Error: Invalid branch name '{selected_branch_name}'.")
         return
