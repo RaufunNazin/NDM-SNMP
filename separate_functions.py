@@ -111,7 +111,9 @@ async def main():
     
     # Process the SNMP data
     # The 'brand' argument for process_snmp_data is used to check if it's CDATA_EPON or CDATA_GPON
+    print(result)
     processed_data = process_snmp_data(result, brand=dynamic_brand_str_key, olt_type=olt_type)
+    print(processed_data)
     
     if store_output:
         # Store the output in a file
