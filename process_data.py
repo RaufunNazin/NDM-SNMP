@@ -60,6 +60,7 @@ def process_cdata(snmp_output_lines, olt_type):
             #     continue
             print(f"oid_components: {oid_components}")
             print(f"parts: {parts}")
+            print(f"full line: {line}")
             device_id_str = oid_components[1] # IndexID
 
             # Extract value type indicator (e.g., "Hex-STRING") and raw value string
