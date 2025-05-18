@@ -131,29 +131,31 @@ def resolve_oid(oid, mib_view):
 async def get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand, onu_index_str):
     """
     Perform an SNMP walk or get operation to retrieve OLT information.
+    Returns all resolved OIDs and values as strings.
     """
     result = []
     start_time = time.time()
 
-    # Load MIBs
+    # Load MIBs once (this can be further memoized)
     mib_builder = load_mibs()
     mib_view = view.MibViewController(mib_builder)
 
-    # Resolve OID
-    if onu_index_str is not None:
+    # Prepare OID
+    if onu_index_str:
         index = encode_index_from_string(onu_index_str, brand)
         oid_to_query = f'{oid_dictionary[branch][brand]}.{index}'
     else:
         oid_to_query = oid_dictionary[branch][brand]
 
+    # SNMP Session
     snmp_engine, community, transport, context = await get_snmp_session(
         target_ip, port, community_string, version, timeout, retries
     )
 
     print(f"{'Starting SNMP get' if onu_index_str else 'Starting SNMP walk'} for OID: {oid_to_query}")
 
-    if onu_index_str is not None:
-        # Use get_cmd (returns a tuple)
+    if onu_index_str:
+        # Single SNMP get
         errorIndication, errorStatus, errorIndex, varBinds = await get_cmd(
             snmp_engine,
             community,
@@ -163,14 +165,16 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         )
 
         if errorIndication:
-            print(f"Error: {errorIndication}")
             return [f"Error: {errorIndication}"]
         elif errorStatus:
-            print(f"SNMP Error: {errorStatus.prettyPrint()} at {errorIndex and varBinds[int(errorIndex) - 1][0] or '?'}")
             return [f"SNMP Error: {errorStatus.prettyPrint()} at {errorIndex and varBinds[int(errorIndex) - 1][0] or '?'}"]
-        else:
-            varBindList = varBinds
+
+        for oid, value in varBinds:
+            symbolic_oid = resolve_oid(oid, mib_view)
+            formatted_value = format_raw_values(value, type(value).__name__.upper())
+            result.append(f"{symbolic_oid} = {formatted_value}")
     else:
+        # SNMP walk
         objects = walk_cmd(
             snmp_engine,
             community,
@@ -182,30 +186,16 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
 
         async for errorIndication, errorStatus, errorIndex, varBinds in objects:
             if errorIndication:
-                print(f"Error: {errorIndication}")
                 return [f"Error: {errorIndication}"]
             elif errorStatus:
-                print(f"SNMP Error: {errorStatus.prettyPrint()} at {errorIndex and varBinds[int(errorIndex) - 1][0] or '?'}")
                 return [f"SNMP Error: {errorStatus.prettyPrint()} at {errorIndex and varBinds[int(errorIndex) - 1][0] or '?'}"]
             else:
-                for varBind in varBinds:
-                    oid, value = varBind
+                for oid, value in varBinds:
                     symbolic_oid = resolve_oid(oid, mib_view)
                     formatted_value = format_raw_values(value, type(value).__name__.upper())
                     result.append(f"{symbolic_oid} = {formatted_value}")
-        end_time = time.time()
-        print(f"Elapsed time: {end_time - start_time:.2f} seconds")
-        print(f"SNMP walk completed. Found {len(result)} OIDs.")
-        return result
-
-    # Handle the single response from get_cmd
-    for varBind in varBindList:
-        oid, value = varBind
-        symbolic_oid = resolve_oid(oid, mib_view)
-        formatted_value = format_raw_values(value, type(value).__name__.upper())
-        result.append(f"{symbolic_oid} = {formatted_value}")
 
     end_time = time.time()
     print(f"Elapsed time: {end_time - start_time:.2f} seconds")
-    print(f"SNMP get completed. Retrieved {len(result)} OIDs.")
+    print(f"SNMP {'get' if onu_index_str else 'walk'} completed. Retrieved {len(result)} OIDs.")
     return result
