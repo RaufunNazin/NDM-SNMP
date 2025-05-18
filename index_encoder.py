@@ -1,6 +1,5 @@
 import re
 from enums import EPON_LOWER, GPON_LOWER, CDATA
-from index_decoder import decode_cdata_epon, decode_cdata_gpon
 
 def _parse_interface_string(interface_string: str):
     """

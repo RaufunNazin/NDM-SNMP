@@ -122,6 +122,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         timeout (int): Timeout in seconds for SNMP requests.
         branch (str): The branch of OLT information to retrieve.
         brand (str): The brand of the device.
+        index_str (str): The specific interface index string to query (e.g., "gpon0/0/1/12").
     Returns:
         list: A list of strings containing the OLT information.
     """
@@ -133,9 +134,13 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
     mib_builder = load_mibs()
     mib_view = view.MibViewController(mib_builder)
     
-    if index_str is not None:
+    if index_str:
         # If an index is provided
         index = encode_index_from_string(index_str, brand)
+        if index is None:
+            error_msg = f"Error: Could not encode provided index string '{index_str}' for brand '{brand}'. Invalid index."
+            print(error_msg)
+            return [error_msg]
         oid_to_walk = f'{oid_dictionary[branch][brand]}.{index}'
     else:
         oid_to_walk = oid_dictionary[branch][brand]
