@@ -154,6 +154,8 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         ObjectType(ObjectIdentity(oid_to_walk)),
         lexicographicMode=False
     )
+    print(f"Starting SNMP walk for OID: {oid_to_walk}")
+    print(oid_to_walk)
     
     # Process the response from the SNMP walk
     async for errorIndication, errorStatus, errorIndex, varBinds in objects:
