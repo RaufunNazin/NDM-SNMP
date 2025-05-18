@@ -138,7 +138,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         # If an index is provided
         index = encode_index_from_string(onu_index_str, brand)
         # Create the generator for the SNMP get operation
-        objects = get_cmd(
+        objects = await get_cmd(
             SnmpEngine(),
             CommunityData(community_string, mpModel=version),
             await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
@@ -149,7 +149,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         print(f"Starting SNMP walk for OID: {f'{oid_dictionary[branch][brand]}.{index}'}")
     else:
         # Create the generator for the SNMP walk operation
-        objects = walk_cmd(
+        objects = await walk_cmd(
             SnmpEngine(),
             CommunityData(community_string, mpModel=version),
             await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
