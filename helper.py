@@ -190,9 +190,36 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
             elif errorStatus:
                 return [f"SNMP Error: {errorStatus.prettyPrint()} at {errorIndex and varBinds[int(errorIndex) - 1][0] or '?'}"]
             else:
-                for oid, value in varBinds:
-                    symbolic_oid = resolve_oid(oid, mib_view)
-                    formatted_value = format_raw_values(value, type(value).__name__.upper())
+                for varBind in varBinds:
+                    oid, value = varBind
+                    
+                    # Try to resolve to symbolic name
+                    try:
+                        oid_obj = ObjectIdentity(oid)
+                        oid_obj.resolve_with_mib(mib_view)
+                        symbolic_oid = oid_obj.prettyPrint()
+                    except Exception as e:
+                        # On failure, use the numeric OID but try to resolve as much as possible
+                        try:
+                            # Try to resolve the module and object name
+                            mib_node = mib_view.get_node_name(oid)
+                            module_name = mib_node[0]
+                            obj_name = mib_node[1]
+                            
+                            # Get any indices
+                            indices = list(oid[len(mib_view.get_node_oid(mib_node)):])
+                            index_str = '.' + '.'.join([str(i) for i in indices]) if indices else ''
+                            
+                            symbolic_oid = f"{module_name}::{obj_name}{index_str}"
+                        except Exception:
+                            symbolic_oid = oid.prettyPrint()
+                    
+                    # Format the value based on its type
+                    value_type = type(value).__name__.upper()
+                    
+                    formatted_value = format_raw_values(value, value_type)
+                    
+                    # Append formatted output
                     result.append(f"{symbolic_oid} = {formatted_value}")
 
     end_time = time.time()
