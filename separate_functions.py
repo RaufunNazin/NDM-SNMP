@@ -24,29 +24,29 @@ def process_snmp_data(snmp_output_lines, brand, olt_type):
 
 async def main():
     # Define a mapping from string names (used in CLI) to the actual enum constants for branches
-    branches = [
-        MAC,
-        OPERATION_STATUS,
-        ADMIN_STATUS,
-        DISTANCE,
-        UP_SINCE,
-        VENDOR,
-        MODEL,
-        SERIAL_NO,
-        POWER,
-    ]
+    branches = {
+    "MAC": MAC,
+    "OPERATION_STATUS": OPERATION_STATUS,
+    "ADMIN_STATUS": ADMIN_STATUS,
+    "DISTANCE": DISTANCE,
+    "UP_SINCE": UP_SINCE,
+    "VENDOR": VENDOR,
+    "MODEL": MODEL,
+    "SERIAL_NO": SERIAL_NO,
+    "POWER": POWER,
+    }
     
-    supported_brands = [
-        CDATA
-    ]
+    supported_brands = {
+        "CDATA": CDATA
+    }
 
     parser = argparse.ArgumentParser(description="SNMP OLT Information Retriever")
     parser.add_argument("-i", required=True, help="Target OLT IP address")
     parser.add_argument("-c", required=True, help="SNMP community string")
     parser.add_argument("-p", type=int, default=161, help="SNMP port (default: 161)")
-    parser.add_argument("-bc", required=True, choices=list(branches),
+    parser.add_argument("-bc", required=True, choices=list(branches.keys()),
                         help="OID branch to query (default: mac)")
-    parser.add_argument("-bd", required=True, choices=list(supported_brands),
+    parser.add_argument("-bd", required=True, choices=list(supported_brands.keys()),
                         help="Brand prefix, e.g., CDATA. _EPON or _GPON will be appended based on detected OLT type (default: CDATA)")
     parser.add_argument("-v", type=int, default=0, choices=[0, 1], help="SNMP version (0 for v1, 1 for v2c; default: 0)")
     parser.add_argument("-r", type=int, default=3, help="SNMP retries (default: 3)")
