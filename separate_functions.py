@@ -292,7 +292,7 @@ def process_cdata(snmp_output_lines, olt_type):
 
             # Extract value type indicator (e.g., "Hex-STRING") and raw value string
             # Example value_full_str: "Hex-STRING: A2 4F 02 18 E5 80" or "INTEGER: -1280"
-            if value_parts.contains(": "):
+            if value_full_str.contains(": "):
                 value_parts = value_full_str.split(": ", 1)
                 if len(value_parts) != 2:
                     print(f"Warning: Skipping line with invalid value format (no ': ' separator): {line}")
