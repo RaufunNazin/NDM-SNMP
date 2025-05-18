@@ -11,15 +11,14 @@ import cx_Oracle
 _mib_cache = None
 
 # Required MIBs mapping (add as needed)
-BRAND_MIB_MAP = {
-    "mikrotik": ['MIKROTIK-MIB', 'IF-MIB', 'SNMPv2-MIB'],
-    "cdata": ['CDATA-EPON-MIB', 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI', 'IF-MIB'],
-    "nscrtv": ['NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB', 'IF-MIB'],
-    "default": ['IF-MIB', 'SNMPv2-MIB', 'RFC1213-MIB'],
-}
+BRAND_MIB_MAP = [
+ 'MIKROTIK-MIB', 'IF-MIB', 'SNMPv2-MIB', 'CDATA-EPON-MIB',
+ 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI', 'NSCRTV-FTTX-EPON-MIB',
+ 'NSCRTV-FTTX-GPON-MIB', 'RFC1213-MIB'
+]
 
 # Function to load MIBs
-def load_mibs(brand=None):
+def load_mibs():
     """Load and cache MIBs based on brand; fallback to all if unknown"""
     global _mib_cache
     if _mib_cache:
@@ -43,7 +42,7 @@ def load_mibs(brand=None):
         mib_builder.add_mib_sources(builder.DirMibSource(source_mib_dir))
 
     # Choose MIBs to load
-    mibs_to_load = BRAND_MIB_MAP.get(brand.lower(), BRAND_MIB_MAP["default"]) if brand else BRAND_MIB_MAP["default"]
+    mibs_to_load = BRAND_MIB_MAP
 
     for mib in mibs_to_load:
         try:
