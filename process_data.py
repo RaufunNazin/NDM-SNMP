@@ -58,6 +58,7 @@ def process_cdata(snmp_output_lines, olt_type):
             #     print(f"Warning: Could not extract valid numeric device ID from OID '{oid_full_str}' in line: {line}")
             #     print(oid_components, oid_components[1])
             #     continue
+            print(oid_components, oid_components[1])
             device_id_str = oid_components[1] # IndexID
 
             # Extract value type indicator (e.g., "Hex-STRING") and raw value string
