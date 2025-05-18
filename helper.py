@@ -142,7 +142,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
         oid_to_walk = oid_dictionary[branch][brand]
     
     # Create the generator for the SNMP walk operation
-    objects = get_cmd(
+    objects = await get_cmd(
         SnmpEngine(),
         CommunityData(community_string, mpModel=version),
         await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
