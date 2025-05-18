@@ -54,7 +54,7 @@ async def main():
     parser.add_argument("-idx", type=str, default=None,
                         help="Specific interface index string to query (e.g., 'gpon0/0/1/12'). "
                              "If provided, performs an SNMP GET for this specific index.")
-
+    parser.add_argument("-s", type=str, default=None, help="Specify if the outputs should be stored or not and add the file name")
 
     args = parser.parse_args()
 
@@ -67,6 +67,7 @@ async def main():
     snmp_retries = args.r
     snmp_timeout = args.t
     interface_index_str = args.idx
+    store_output = args.s
     
     selected_branch_constant = branches.get(selected_branch_name)
     if selected_branch_constant is None:
@@ -111,6 +112,18 @@ async def main():
     # Process the SNMP data
     # The 'brand' argument for process_snmp_data is used to check if it's CDATA_EPON or CDATA_GPON
     processed_data = process_snmp_data(result, brand=dynamic_brand_str_key, olt_type=olt_type)
+    
+    if store_output:
+        # Store the output in a file
+        with open(store_output, 'w') as f:
+            for item in processed_data:
+                for key, value_map in item.items():
+                    f.write(f"\n--- {key} ---\n")
+                    if not value_map:
+                        f.write("  No entries found.\n")
+                    for frame_id, parsed_value in value_map.items():
+                        f.write(f"  {frame_id}: {parsed_value}\n")
+        print(f"Output stored in {store_output}")
     
     # Print the result
     if not processed_data:
