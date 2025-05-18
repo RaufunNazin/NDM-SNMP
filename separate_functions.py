@@ -1,7 +1,7 @@
 from pysnmp.smi import view
 from pysnmp.hlapi.v3arch.asyncio import *
 import time
-from utils import load_mibs, format_mac, convert_power_to_dbm, decode_epon_device_index
+from utils import load_mibs, format_mac, convert_power_to_dbm, decode_cdata_epon_device_index, decode_cdata_gpon_device_index
 import asyncio
 from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA, CDATA_EPON, CDATA_GPON, OCTETSTRING, HEX_STRING, OID, OID_SHORT, GAUGE, GAUGE32, INTEGER, STRING, COUNTER, COUNTER32, COUNTER64, TIMETICKS, IPADDRESS, NULL, FRAME_ID, SLOT_ID, PON_ID, ONU_ID
 import argparse
@@ -237,8 +237,6 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
 def process_cdata(snmp_output_lines, olt_type):
     """
     Processes SNMP output lines to extract and structure data.
-    The function assumes indices in the OIDs are EPON device IDs
-    decodable by decode_epon_device_index.
 
     Args:
         snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
@@ -290,7 +288,7 @@ def process_cdata(snmp_output_lines, olt_type):
             if len(oid_components) < 2 or not oid_components[1].isdigit():
                 print(f"Warning: Could not extract valid numeric device ID from OID '{oid_full_str}' in line: {line}")
                 continue
-            device_id_str = oid_components[1] # This is the ID for decode_epon_device_index
+            device_id_str = oid_components[1] # IndexID
 
             # Extract value type indicator (e.g., "Hex-STRING") and raw value string
             # Example value_full_str: "Hex-STRING: A2 4F 02 18 E5 80" or "INTEGER: -1280"
@@ -302,9 +300,12 @@ def process_cdata(snmp_output_lines, olt_type):
             value_type_indicator = value_parts[0] # e.g., "Hex-STRING", INTEGER, "Counter32"
             raw_value_str = value_parts[1]        # e.g., "A2 4F 02 18 E5 80", "-1280", "12345"
 
-            # Decode device ID to frame ID using decode_epon_device_index
+            # Decode device ID to Logical ID using decode function
             device_id_int = int(device_id_str) # Can raise ValueError
-            decoded_indices = decode_epon_device_index(device_id_int)
+            if olt_type == "epon":
+                decoded_indices = decode_cdata_epon_device_index(device_id_int)
+            elif olt_type == "gpon":
+                decoded_indices = decode_cdata_gpon_device_index(device_id_int)
             frame_id = 0
             slot_id = decoded_indices[SLOT_ID]
             pon_id = decoded_indices[PON_ID]
