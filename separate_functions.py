@@ -56,6 +56,7 @@ async def main():
                              "If provided, performs an SNMP GET for this specific index.")
     parser.add_argument("-s", type=str, default=None, help="Specify if the outputs should be stored or not and add the file name")
     parser.add_argument("-cr", type=int, default=None, help="ONU Card ID/ required to encode to onuDeviceIndex")
+    parser.add_argument("-all", type=bool, default=False, help="If True, all OIDs will be queried. If False, only the specified branch will be queried.")
 
     args = parser.parse_args()
 
@@ -70,6 +71,7 @@ async def main():
     interface_index_str = args.idx
     store_output = args.s
     card_id = args.cr
+    all_oid = args.all
     
     selected_branch_constant = branches.get(selected_branch_name)
     if selected_branch_constant is None:
@@ -109,7 +111,8 @@ async def main():
         branch=selected_branch_constant,
         brand=dynamic_brand_str_key,
         onu_index_str=interface_index_str,
-        card_id=card_id
+        card_id=card_id,
+        all_oid=all_oid
     )
     
     # Process the SNMP data
