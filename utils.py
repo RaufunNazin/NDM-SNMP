@@ -11,11 +11,7 @@ import cx_Oracle
 _mib_cache = None
 
 # Required MIBs mapping (add as needed)
-BRAND_MIB_MAP = [
- 'MIKROTIK-MIB', 'IF-MIB', 'SNMPv2-MIB', 'CDATA-EPON-MIB',
- 'CDATA-GPON-MIB', 'CDATA-COMMON-SMI', 'NSCRTV-FTTX-EPON-MIB',
- 'NSCRTV-FTTX-GPON-MIB', 'RFC1213-MIB'
-]
+BRAND_MIB_MAP = ['IF-MIB', 'SNMPv2-MIB','NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB']
 
 # Function to load MIBs
 def load_mibs():
