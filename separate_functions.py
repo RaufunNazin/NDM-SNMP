@@ -300,6 +300,9 @@ def process_cdata(snmp_output_lines, olt_type):
                 
                 value_type_indicator = value_parts[0] # e.g., "Hex-STRING", INTEGER, "Counter32"
                 raw_value_str = value_parts[1]        # e.g., "A2 4F 02 18 E5 80", "-1280", "12345"
+            elif value_full_str == "":
+                value_type_indicator = NULL
+                raw_value_str = ""
             else:
                 raw_value_str = value_full_str
 
@@ -346,6 +349,8 @@ def process_cdata(snmp_output_lines, olt_type):
             elif value_type_indicator == STRING:
                 # For STRING type, remove surrounding quotes if present (e.g. "some value" -> some value)
                 parsed_value = raw_value_str.strip('"')
+            elif value_type_indicator == NULL:
+                parsed_value = None
             else:
                 # Default for other types (e.g., Timeticks, IpAddress which are already formatted as strings)
                 parsed_value = raw_value_str
