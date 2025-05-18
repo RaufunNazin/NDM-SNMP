@@ -133,7 +133,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
     mib_builder = load_mibs()
     mib_view = view.MibViewController(mib_builder)
     
-    if index_str:
+    if index_str is not None:
         # If an index is provided
         index = encode_index_from_string(index_str, brand)
         oid_to_walk = f'{oid_dictionary[branch][brand]}.{index}'

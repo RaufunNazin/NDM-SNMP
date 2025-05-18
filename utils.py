@@ -18,13 +18,11 @@ def load_mibs():
     compiled_mib_dir = COMPILED_MIBS
     if os.path.exists(compiled_mib_dir):
         mib_builder.add_mib_sources(builder.DirMibSource(compiled_mib_dir))
-        print(f"Added compiled MIBs path: {compiled_mib_dir}")
     
     
     # Also add source MIBs directory as last resort
     source_mib_dir = 'mibs'
     mib_builder.add_mib_sources(builder.DirMibSource(source_mib_dir))
-    print(f"Added source MIBs path: {source_mib_dir}")
     
     # Try to load important MIBs
     core_mibs = [
@@ -37,7 +35,6 @@ def load_mibs():
     for mib in core_mibs:
         try:
             mib_builder.load_modules(mib)
-            print(f"Loaded MIB: {mib}")
         except Exception as e:
             print(f"Warning: Could not load MIB {mib}: {e}")
     
