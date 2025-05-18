@@ -11,4 +11,4 @@ def decode_gpon_device_index(device_id):
         'ONU_ID': onu,
     }
     
-print(decode_gpon_device_index(16779012))
+print(decode_gpon_device_index(16779546))

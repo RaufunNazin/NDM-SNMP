@@ -169,32 +169,6 @@ def convert_power_to_dbm(power_value):
     # The value -2268 suggests units of 0.01 dBm, hence division by 100.
     return float(power_value) / 100.0  # Divide by 100 for dBm value
 
-# Function to decode EPON device index
-def decode_cdata_epon_device_index(device_id):
-    # Extract the raw bytes
-    slot = (device_id >> 24) & 0xFF
-    pon = (device_id >> 8) & 0xFF
-    onu = device_id & 0xFF
-
-    return {
-        SLOT_ID: slot,
-        PON_ID: (pon // 16) + 1,
-        ONU_ID: onu,
-    }
-    
-# Function to decode EPON device index
-def decode_cdata_gpon_device_index(device_id):
-    # Extract the raw bytes
-    slot = (device_id >> 24) & 0xFF
-    pon = (device_id >> 8) & 0xFF
-    onu = device_id & 0xFF
-
-    return {
-        SLOT_ID: slot - 1 if slot > 0 else 0,
-        PON_ID: pon - 6,
-        ONU_ID: onu,
-    }
-
 # Function to parse SNMP output and extract ONU data
 def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal 'data' variables
     onu_data = {} # This dictionary will use string keys for ONU indices

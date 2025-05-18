@@ -51,6 +51,10 @@ async def main():
     parser.add_argument("-v", type=int, default=0, choices=[0, 1], help="SNMP version (0 for v1, 1 for v2c; default: 0)")
     parser.add_argument("-r", type=int, default=3, help="SNMP retries (default: 3)")
     parser.add_argument("-t", type=int, default=3, help="SNMP timeout in seconds (default: 3)")
+    parser.add_argument("-idx", type=str, default=None,
+                        help="Specific interface index string to query (e.g., 'gpon0/0/1/12'). "
+                             "If provided, performs an SNMP GET for this specific index.")
+
 
     args = parser.parse_args()
 
@@ -62,6 +66,7 @@ async def main():
     snmp_version = args.v
     snmp_retries = args.r
     snmp_timeout = args.t
+    interface_index_str = args.idx
     
     selected_branch_constant = branches.get(selected_branch_name)
     if selected_branch_constant is None:
@@ -99,7 +104,8 @@ async def main():
         retries=snmp_retries,
         timeout=snmp_timeout,
         branch=selected_branch_constant,
-        brand=dynamic_brand_str_key
+        brand=dynamic_brand_str_key,
+        index_str=interface_index_str
     )
     
     # Process the SNMP data

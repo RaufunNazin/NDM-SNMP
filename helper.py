@@ -4,6 +4,7 @@ import time
 from utils import load_mibs
 from enums import OCTETSTRING, HEX_STRING, OID, OID_SHORT, GAUGE32, INTEGER, STRING, COUNTER32, COUNTER64, TIMETICKS, IPADDRESS, NULL, CDATA, EPON_LOWER, GPON_LOWER, PON_LOWER
 from oid_dict import oid_dictionary, IFDESCR
+from index_encoder import encode_index_from_string
 
 def format_raw_values(value, value_type):
     """
@@ -109,7 +110,7 @@ async def get_olt_type(target_ip, community_string, port, brand, version, retrie
     
     return determined_type
 
-async def get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand):
+async def get_olt_information(target_ip, community_string, port, version, retries, timeout, branch, brand, index_str):
     """
     Perform an SNMP walk operation to retrieve OLT information.
     Args:
@@ -132,13 +133,20 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
     mib_builder = load_mibs()
     mib_view = view.MibViewController(mib_builder)
     
+    if index_str:
+        # If an index is provided
+        index = encode_index_from_string(index_str, brand)
+        oid_to_walk = f'{oid_dictionary[branch][brand]}.{index}'
+    else:
+        oid_to_walk = oid_dictionary[branch][brand]
+    
     # Create the generator for the SNMP walk operation
     objects = walk_cmd(
         SnmpEngine(),
         CommunityData(community_string, mpModel=version),
         await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
         ContextData(),
-        ObjectType(ObjectIdentity(oid_dictionary[branch][brand])),
+        ObjectType(ObjectIdentity(oid_to_walk)),
         lexicographicMode=False
     )
     

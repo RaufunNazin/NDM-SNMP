@@ -1,4 +1,5 @@
-from utils import format_mac, convert_power_to_dbm, decode_cdata_epon_device_index, decode_cdata_gpon_device_index
+from utils import format_mac, convert_power_to_dbm
+from index_decoder import decode_cdata_epon, decode_cdata_gpon
 from enums import HEX_STRING, GAUGE, INTEGER, STRING, COUNTER, NULL, SLOT_ID, PON_ID, ONU_ID, EPON_LOWER, GPON_LOWER
 from datetime import datetime, timedelta
 
@@ -77,9 +78,9 @@ def process_cdata(snmp_output_lines, olt_type):
             # Decode device ID to Logical ID using decode function
             device_id_int = int(device_id_str) # Can raise ValueError
             if olt_type == EPON_LOWER:
-                decoded_indices = decode_cdata_epon_device_index(device_id_int)
+                decoded_indices = decode_cdata_epon(device_id_int)
             elif olt_type == GPON_LOWER:
-                decoded_indices = decode_cdata_gpon_device_index(device_id_int)
+                decoded_indices = decode_cdata_gpon(device_id_int)
             frame_id = 0
             slot_id = decoded_indices[SLOT_ID]
             pon_id = decoded_indices[PON_ID]
