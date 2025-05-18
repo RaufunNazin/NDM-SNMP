@@ -218,7 +218,7 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
                     value_type = type(value).__name__.upper()
                     
                     formatted_value = format_raw_values(value, value_type)
-                    
+                    print(f"OID: {symbolic_oid}, Value: {formatted_value}")
                     # Append formatted output
                     result.append(f"{symbolic_oid} = {formatted_value}")
 
