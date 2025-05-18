@@ -137,21 +137,29 @@ async def get_olt_information(target_ip, community_string, port, version, retrie
     if onu_index_str is not None:
         # If an index is provided
         index = encode_index_from_string(onu_index_str, brand)
-        oid_to_walk = f'{oid_dictionary[branch][brand]}.{index}'
+        # Create the generator for the SNMP get operation
+        objects = get_cmd(
+            SnmpEngine(),
+            CommunityData(community_string, mpModel=version),
+            await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
+            ContextData(),
+            ObjectType(ObjectIdentity(f'{oid_dictionary[branch][brand]}.{index}')),
+            lexicographicMode=False
+        )
+        print(f"Starting SNMP walk for OID: {f'{oid_dictionary[branch][brand]}.{index}'}")
     else:
-        oid_to_walk = oid_dictionary[branch][brand]
+        # Create the generator for the SNMP walk operation
+        objects = walk_cmd(
+            SnmpEngine(),
+            CommunityData(community_string, mpModel=version),
+            await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
+            ContextData(),
+            ObjectType(ObjectIdentity(f'{oid_dictionary[branch][brand]}')),
+            lexicographicMode=False
+        )
+        print(f"Starting SNMP walk for OID: {f'{oid_dictionary[branch][brand]}'}")
     
-    # Create the generator for the SNMP walk operation
-    objects = walk_cmd(
-        SnmpEngine(),
-        CommunityData(community_string, mpModel=version),
-        await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
-        ContextData(),
-        ObjectType(ObjectIdentity(oid_to_walk)),
-        lexicographicMode=False
-    )
-    print(f"Starting SNMP walk for OID: {oid_to_walk}")
-    print(oid_to_walk)
+    
     
     # Process the response from the SNMP walk
     async for errorIndication, errorStatus, errorIndex, varBinds in objects:
