@@ -1,0 +1,16 @@
+certifi
+cffi
+charset-normalizer
+cx-Oracle
+idna
+Jinja2
+MarkupSafe
+ply
+pyasn1
+pycparser
+pycryptodomex
+pysmi
+pysnmp
+python-dotenv
+requests
+urllib3
