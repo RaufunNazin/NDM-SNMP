@@ -1,17 +1,17 @@
 import asyncio
-from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA, CDATA_EPON, CDATA_GPON
+from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA_EPON, CDATA_GPON
 import argparse
-from helper import get_olt_type, get_olt_information
+from helper import get_olt_information
 from process_data import process_cdata
 
 def process_snmp_data(snmp_output_lines, brand, olt_type):
     """
-    Process SNMP data based on the brand.
+    Process SNMP data based on the `brand.
     
     Args:
         snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
         brand (str): The brand of the device (e.g., CDATA_EPON).
-        olt_type (str): The type of OLT, either 'epon' or 'gpon'.
+        olt_type (str): The type of OLT, either 'EPON' or 'GPON'.
     
     Returns:
         list: A list of dictionaries with processed data.
@@ -37,17 +37,18 @@ async def main():
     }
     
     supported_brands = {
-        "CDATA": CDATA
+        "CDATA-EPON": CDATA_EPON,
+        "CDATA-GPON": CDATA_GPON,
     }
 
     parser = argparse.ArgumentParser(description="SNMP OLT Information Retriever")
-    parser.add_argument("-i", required=True, help="Target OLT IP address")
-    parser.add_argument("-c", required=True, help="SNMP community string")
+    parser.add_argument("-i", required=True, help="Target OLT IP address or hostname")
+    parser.add_argument("-c", required=True, help="SNMP community string for read access")
     parser.add_argument("-p", type=int, default=161, help="SNMP port (default: 161)")
     parser.add_argument("-bc", required=True, choices=list(branches.keys()),
-                        help="OID branch to query (default: mac)")
+                        help="OID branch to query, e.g., MAC, OPERATION_STATUS, etc.")
     parser.add_argument("-bd", required=True, choices=list(supported_brands.keys()),
-                        help="Brand prefix, e.g., CDATA. _EPON or _GPON will be appended based on detected OLT type (default: CDATA)")
+                        help="Brand, e.g., CDATA-EPON or CDATA-GPON")
     parser.add_argument("-v", type=int, default=0, choices=[0, 1], help="SNMP version (0 for v1, 1 for v2c; default: 0)")
     parser.add_argument("-r", type=int, default=3, help="SNMP retries (default: 3)")
     parser.add_argument("-t", type=int, default=3, help="SNMP timeout in seconds (default: 3)")
@@ -64,7 +65,7 @@ async def main():
     community_string = args.c
     port = args.p
     selected_branch_name = args.bc
-    brand_prefix = args.bd
+    brand = args.bd
     snmp_version = args.v
     snmp_retries = args.r
     snmp_timeout = args.t
@@ -80,25 +81,11 @@ async def main():
 
     # Get OLT type
     print(f"Determining OLT type for {target_ip}...")
-    olt_type = await get_olt_type(
-        target_ip=target_ip,
-        community_string=community_string,
-        port=port,
-        brand=brand_prefix,
-        version=snmp_version,
-        retries=snmp_retries,
-        timeout=snmp_timeout
-    )
+    olt_type = brand.split('-')[1].lower() if '-' in brand else print(f"Error: Could not determine OLT type for {target_ip}. Aborting.")
+    
     print(f"Determined OLT Type: {olt_type}")
 
-    if olt_type == "unknown":
-        print(f"Error: Could not determine OLT type for {target_ip}. Aborting.")
-        return
-
-    # Construct the dynamic brand string key (e.g., "CDATA_EPON")
-    dynamic_brand_str_key = f"{brand_prefix.upper()}_{olt_type.upper()}"
-
-    print(f"Querying branch '{selected_branch_name}' for brand '{dynamic_brand_str_key}'")
+    print(f"Querying branch '{selected_branch_name}' for brand '{brand}'")
 
     # Call the function to get OLT information
     result = await get_olt_information(
@@ -109,7 +96,7 @@ async def main():
         retries=snmp_retries,
         timeout=snmp_timeout,
         branch=selected_branch_constant,
-        brand=dynamic_brand_str_key,
+        brand=brand,
         onu_index_str=interface_index_str,
         card_id=card_id,
         all_oid=all_oid
@@ -117,7 +104,7 @@ async def main():
     
     # Process the SNMP data
     # The 'brand' argument for process_snmp_data is used to check if it's CDATA_EPON or CDATA_GPON
-    processed_data = process_snmp_data(result, brand=dynamic_brand_str_key, olt_type=olt_type)
+    processed_data = process_snmp_data(result, brand=brand, olt_type=olt_type)
     
     if store_output:
         # Store the output in a file

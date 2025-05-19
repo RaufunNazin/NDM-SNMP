@@ -51,65 +51,7 @@ def format_raw_values(value, value_type):
         return '""'
     else:
         return f"{value_type}: {value.prettyPrint()}"
-    
-async def get_olt_type(target_ip, community_string, port, brand, version, retries, timeout):
-    """
-    Determines OLT type (epon/gpon) by walking ifDescr.
-    Args:
-        target_ip (str): The IP address of the target device.
-        community_string (str): The SNMP community string.
-        port (int): SNMP port.
-        brand (str): The brand of the device.
-        version (int): SNMP version.
-        retries (int): SNMP retries.
-        timeout (int): SNMP timeout.
-    Returns:
-        str: "epon", "gpon", or "unknown".
-    """
-    if_descr_oid = IFDESCR  # ifDescr
-    determined_type = "unknown"
 
-    engine = SnmpEngine()
-    
-    try:
-        async for errorIndication, errorStatus, errorIndex, varBinds in walk_cmd(
-            engine,
-            CommunityData(community_string, mpModel=version),
-            await UdpTransportTarget.create((target_ip, port), timeout=timeout, retries=retries),
-            ContextData(),
-            ObjectType(ObjectIdentity(if_descr_oid)),
-            lexicographicMode=False
-        ):
-            if errorIndication:
-                print(f"OLT Type Determination - SNMP Error: {errorIndication}")
-                break
-            elif errorStatus:
-                print(f"OLT Type Determination - SNMP Status Error: {errorStatus.prettyPrint()} at {errorIndex and varBinds[int(errorIndex) - 1][0] or '?'}")
-                break
-            else:
-                for varBind in varBinds:
-                    _oid, value = varBind
-                    # Value is typically OctetString for ifDescr
-                    descr = ""
-                    if hasattr(value, 'prettyPrint'):
-                        descr = value.prettyPrint().lower()
-                    elif isinstance(value, bytes): # Fallback for raw bytes
-                        try:
-                            descr = value.decode('utf-8', errors='ignore').lower()
-                        except:
-                             pass # Ignore decoding errors for non-string bytes
-                         
-                    if brand == CDATA:
-                        if EPON_LOWER in descr:
-                            determined_type = EPON_LOWER
-                            return determined_type  # Found, can exit early
-                        elif GPON_LOWER in descr or PON_LOWER in descr:
-                            determined_type = GPON_LOWER
-                            return determined_type  # Found, can exit early
-    except Exception as e:
-        print(f"Exception during OLT type determination: {e}")
-    
-    return determined_type
 
 def resolve_oid(oid, mib_view):
     try:
