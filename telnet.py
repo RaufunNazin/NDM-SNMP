@@ -1,11 +1,8 @@
 import telnetlib
 import time
 import re
+import argparse
 
-HOST = "10.254.0.5"
-PORT = 1123
-USERNAME = "admin"
-PASSWORD = "admin"
 MORE_PROMPT = b"--More ( Press 'Q' to quit )--"
 
 def detect_prompt(tn):
@@ -57,7 +54,7 @@ def parse_mac_table(text):
         )
         if match:
             mac, vlan, sport, port, onu, gemid, mac_type = match.groups()
-            formatted_port = f"{port}:{onu}" if onu != "-" else port
+            formatted_port = f"{port}/{onu}" if onu != "-" else port
             mac_entries.append({
                 "mac": mac,
                 "vlan": int(vlan),
@@ -67,6 +64,19 @@ def parse_mac_table(text):
     return mac_entries
 
 def main():
+    parser = argparse.ArgumentParser(description="Telnet MAC Address Table Fetcher")
+    parser.add_argument("-i", required=True, help="Target device IP address")
+    parser.add_argument("-p", type=int, default=23, help="Telnet port (default: 23)")
+    parser.add_argument("-u", required=True, help="Username for telnet login")
+    parser.add_argument("-ps", required=True, help="Password for telnet login")
+    
+    args = parser.parse_args()
+    
+    HOST = args.i
+    PORT = args.p
+    USERNAME = args.u
+    PASSWORD = args.ps
+    
     try:
         print(f"[+] Connecting to {HOST}:{PORT} ...")
         tn = telnetlib.Telnet(HOST, PORT, timeout=10)
