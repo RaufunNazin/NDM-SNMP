@@ -139,6 +139,10 @@ def main():
         # Run the target command with pagination support
         output = send_command_with_prompt_and_pagination(tn, "show mac-address all", prompt)
         print("\n[+] Full output of 'show mac-address all':\n")
+        
+        print(output)
+        
+        print("----------------------------------------------------")
 
         parsed_output = parse_mac_table(output)
         for entry in parsed_output:
