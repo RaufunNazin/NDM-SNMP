@@ -19,20 +19,35 @@ def detect_prompt(tn):
 
 def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt=MORE_PROMPT):
     print(f"[+] Sending command: {command}")
+    
+    # Clear any prior error messages
+    tn.write(b"\n")
+    time.sleep(0.5)
+
+    # Send the command
     tn.write(command.encode('ascii') + b"\n")
     output = b""
+
     while True:
-        chunk = tn.read_until(more_prompt, timeout=5)
+        chunk = tn.read_until(prompt, timeout=5)
         output += chunk
-        if more_prompt in chunk:
+
+        # Decode chunk to inspect lines
+        lines = chunk.decode("utf-8", errors="ignore").splitlines()
+
+        if any(more_prompt.decode() in line for line in lines):
             print("[+] More data found, sending SPACE")
             tn.write(b" ")
         else:
-            # Ensure final prompt is received
-            remaining = tn.read_until(prompt, timeout=10)
-            output += remaining
             break
+
     return output.decode("utf-8", errors="ignore")
+
+def flush_extra_output(tn):
+    tn.write(b"\n")
+    tn.write(b"\n")
+    tn.write(b"\n")
+    _ = tn.read_very_eager()  # Discard junk
 
 def parse_mac_table(text):
     mac_entries = []
@@ -97,16 +112,31 @@ def main():
         prompt = detect_prompt(tn)
         print(f"[+] Detected prompt: {prompt.decode()}")
 
+        # Flush any extra output
+        print("[+] Flushing extra output...")
+        flush_extra_output(tn)
+        print("[+] Flushed extra output.")
+        
         # Enter enable mode
         print("[+] Sending 'enable' command...")
         tn.write(b"enable\n")
         time.sleep(1)
+        
+        # Flush any extra output
+        print("[+] Flushing extra output...")
+        flush_extra_output(tn)
+        print("[+] Flushed extra output.")
 
         # Optionally go to config if needed
         tn.write(b"config\n")
         time.sleep(1)
         prompt = detect_prompt(tn)
         print(f"[+] Updated prompt after config: {prompt.decode()}")
+        
+        # Flush any extra output
+        print("[+] Flushing extra output...")
+        flush_extra_output(tn)
+        print("[+] Flushed extra output.")
 
         # Run the target command with pagination support
         output = send_command_with_prompt_and_pagination(tn, "show mac-address all", prompt)
