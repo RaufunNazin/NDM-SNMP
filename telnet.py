@@ -12,8 +12,9 @@ def detect_prompt(tn):
     lines = response.strip().split(b"\n")
     if lines:
         last_line = lines[-1].strip()
-        if last_line.endswith(b"#") or last_line.endswith(b">"):
-            return last_line
+        if b">" in last_line:
+            prompt = last_line.split(b">")[0]
+            return prompt
     raise ValueError("Failed to detect device prompt.")
 
 def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt=MORE_PROMPT):
