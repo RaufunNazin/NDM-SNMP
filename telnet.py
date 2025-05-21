@@ -2,6 +2,18 @@ import telnetlib
 import time
 import re
 import argparse
+import os
+from dotenv import load_dotenv
+from onu_scraper import insert_into_db_olt_customer_mac
+
+# Load environment variables from .env file
+load_dotenv()
+
+db_host = os.getenv("DB_HOST")
+db_port = os.getenv("DB_PORT")
+db_user = os.getenv("DB_USER")
+db_pass = os.getenv("DB_PASS")
+db_sid = os.getenv("DB_SID")
 
 MORE_PROMPT = b"--More ( Press 'Q' to quit )--"
 
@@ -69,19 +81,20 @@ def parse_mac_table(text):
             mac, vlan, sport, port, onu, gemid, mac_type = match.groups()
             formatted_port = f"{port}/{onu}" if onu != "-" else port
             mac_entries.append({
-                "mac": mac,
-                "vlan": int(vlan),
-                "port": formatted_port
+                "MAC": mac,
+                "VLAN": int(vlan),
+                "Port": formatted_port
             })
 
     return mac_entries
-
+        
 def main():
     parser = argparse.ArgumentParser(description="Telnet MAC Address Table Fetcher")
     parser.add_argument("-i", required=True, help="Target device IP address")
     parser.add_argument("-p", type=int, default=23, help="Telnet port (default: 23)")
     parser.add_argument("-u", required=True, help="Username for telnet login")
     parser.add_argument("-ps", required=True, help="Password for telnet login")
+    parser.add_argument('-d', '--dry-run', action='store_true', help='Parse data but do not insert into database')
     
     args = parser.parse_args()
     
@@ -147,6 +160,12 @@ def main():
 
         print("[+] Session ended.")
         tn.close()
+        
+        # Insert into database unless dry run is specified
+        if not args.dry_run:
+            insert_into_db_olt_customer_mac(parsed_output, HOST, db_host, db_port, db_user, db_pass, db_sid)
+        else:
+            print("Dry run mode: Data not inserted into database")
 
     except Exception as e:
         print("[-] Unexpected error occurred.")
