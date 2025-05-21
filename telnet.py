@@ -130,8 +130,6 @@ def main():
         # Optionally go to config if needed
         tn.write(b"config\n")
         time.sleep(1)
-        prompt = detect_prompt(tn)
-        print(f"[+] Updated prompt after config: {prompt.decode()}")
         
         # Flush any extra output
         print("[+] Flushing extra output...")
