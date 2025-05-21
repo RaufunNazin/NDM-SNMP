@@ -17,37 +17,34 @@ def detect_prompt(tn):
             return prompt
     raise ValueError("Failed to detect device prompt.")
 
+def flush_extra_output(tn):
+    tn.write(b"\n")
+    tn.write(b"\n")
+    tn.write(b"\n")
+    _ = tn.read_very_eager()  # Discard junk
+    
 def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt=MORE_PROMPT):
     print(f"[+] Sending command: {command}")
     
-    # Clear any prior error messages
-    tn.write(b"\n")
-    time.sleep(0.5)
+    flush_extra_output(tn)
+    time.sleep(1)
 
     # Send the command
     tn.write(command.encode('ascii') + b"\n")
     output = b""
 
     while True:
-        chunk = tn.read_until(prompt, timeout=5)
+        chunk = tn.read_until(more_prompt, timeout=5)
         output += chunk
-
-        # Decode chunk to inspect lines
-        lines = chunk.decode("utf-8", errors="ignore").splitlines()
-
-        if any(more_prompt.decode() in line for line in lines):
+        if more_prompt in chunk:
             print("[+] More data found, sending SPACE")
             tn.write(b" ")
         else:
+            # Ensure final prompt is received
+            remaining = tn.read_until(prompt, timeout=10)
+            output += remaining
             break
-
     return output.decode("utf-8", errors="ignore")
-
-def flush_extra_output(tn):
-    tn.write(b"\n")
-    tn.write(b"\n")
-    tn.write(b"\n")
-    _ = tn.read_very_eager()  # Discard junk
 
 def parse_mac_table(text):
     mac_entries = []
