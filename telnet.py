@@ -4,7 +4,7 @@ import re
 import argparse
 import os
 from dotenv import load_dotenv
-from onu_scraper import insert_into_db_olt_customer_mac
+from utils import insert_into_db_olt_customer_mac
 
 # Load environment variables from .env file
 load_dotenv()
