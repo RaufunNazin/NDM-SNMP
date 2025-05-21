@@ -44,8 +44,7 @@ mib_names = [os.path.splitext(f)[0] for f in mib_files]
 print(f"Found {len(mib_names)} MIB files to compile")
 
 # First try to compile the dependencies
-dependencies = ['IANA-ENTITY-MIB', 'UUID-TC-MIB', 'SNMP-FRAMEWORK-MIB', 
-                'SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF', 'SNMPv2-MIB', 'FD-SYSTEM-MIB', 'EPON-EOC-MIB']
+dependencies = ['SNMPv2-SMI', 'SNMPv2-TC', 'SNMPv2-CONF', 'SNMPv2-MIB', 'IF-MIB', 'BRIDGE-MIB', 'RFC-1212']
 
 print("First compiling dependencies...")
 for dep in dependencies:
