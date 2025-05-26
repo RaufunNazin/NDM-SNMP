@@ -7,6 +7,8 @@ import os
 from enums import COMPILED_MIBS
 from pysmi import debug
 import cx_Oracle
+import logging
+
 
 # Cache singleton
 _mib_cache = None
@@ -97,7 +99,7 @@ def format_snmp_output_value(value, value_type):
         return f"{value_type}: {value.prettyPrint()}"
 
 # Perform SNMP Walk using async walk_cmd
-async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_retries):
+async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_retries, debug_mode):
     result = []
     # Start timing
     start_time = time.time()

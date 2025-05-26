@@ -34,9 +34,9 @@ cx_Oracle.init_oracle_client(lib_dir=instant_client)
 
 # Run and display
 async def main():
-    parser = argpar
-    se.ArgumentParser(description='Process ONU data from SNMP output and insert into database')
+    parser = argparse.ArgumentParser(description='Process ONU data from SNMP output and insert into database')
     parser.add_argument('-d', '--dry-run', action='store_true', help='Parse data but do not insert into database')
+    parser.add_argument('-debug', action='store_true', help='Enable debug mode for detailed logging')
     args = parser.parse_args()
     print("Running SNMP walk...")
     print(f"Target IP: {target_ip}")
@@ -46,7 +46,11 @@ async def main():
     print(f"SNMP Version: {'SNMPv1' if snmp_version == 0 else 'SNMPv2c'}")
     print(f"Timeout: {snmp_timeout} seconds")
     print(f"Retries: {snmp_retries}")
-    snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, port, snmp_version, snmp_timeout, snmp_retries)
+    
+    args = parser.parse_args()
+    debug = args.debug
+    
+    snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, port, snmp_version, snmp_timeout, snmp_retries, debug)
     
     snmp_data_str = "\n".join(snmp_output)
     
