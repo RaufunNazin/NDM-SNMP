@@ -43,8 +43,10 @@ def load_mibs():
     mibs_to_load = BRAND_MIB_MAP
 
     for mib in mibs_to_load:
+        t0 = time.time()
         try:
             mib_builder.load_modules(mib)
+            print(f"Loaded {mib} in {time.time() - t0:.2f}s")
         except Exception as e:
             print(f"Warning: Could not load MIB {mib}: {e}")
 
