@@ -8,8 +8,8 @@
 # Notes
 # -----
 # ASN.1 source file://mibs/SNMPv2-SMI
-# Produced by pysmi-1.6.1 at Wed May 21 18:52:21 2025
-# On host user-HP platform Linux version 6.11.0-25-generic by user user
+# Produced by pysmi-1.6.1 at Mon May 26 12:27:01 2025
+# On host user-HP platform Linux version 6.11.0-26-generic by user user
 # Using Python version 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0]
 
 if 'mibBuilder' not in globals():
