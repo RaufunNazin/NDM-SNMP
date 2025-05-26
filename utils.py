@@ -152,7 +152,7 @@ async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_r
                 value_type = type(value).__name__.upper()
                 formatted_value = format_snmp_output_value(value, value_type)
                 
-                print(f"{symbolic_oid.prettyPrint()} = {formatted_value}")
+                # print(f"{symbolic_oid} = {formatted_value}")
                 
                 # Append formatted output
                 result.append(f"{symbolic_oid} = {formatted_value}")
