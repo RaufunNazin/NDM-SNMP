@@ -99,6 +99,7 @@ def format_snmp_output_value(value, value_type):
 
 # Perform SNMP Walk using async walk_cmd
 async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_retries, debug_mode):
+    setup_logging(debug_mode)
     result = []
     # Start timing
     start_time = time.time()
@@ -117,7 +118,6 @@ async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_r
         lexicographicMode=False
     )
     
-    setup_logging(debug_mode)
     
     # Process the response from the SNMP walk
     async for errorIndication, errorStatus, errorIndex, varBinds in objects:
