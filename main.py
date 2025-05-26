@@ -48,9 +48,9 @@ async def main():
     print(f"Retries: {snmp_retries}")
     
     args = parser.parse_args()
-    debug = args.debug
+    debug_mode = args.debug
     
-    snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, port, snmp_version, snmp_timeout, snmp_retries, debug)
+    snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, port, snmp_version, snmp_timeout, snmp_retries, debug_mode)
     
     snmp_data_str = "\n".join(snmp_output)
     
