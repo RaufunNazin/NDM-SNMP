@@ -121,10 +121,10 @@ async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_r
     if debug_mode:
         log_file = 'snmpdebug.log'
         debug_logger = debug.Debug('all')
-        debug.setLogger(debug_logger)
+        debug.set_logger(debug_logger)
 
         # Optionally redirect to your logging setup
-        logger = logging.getLogger('pysmi')
+        logger = logging.get_logger('pysmi')
         file_handler = logging.FileHandler(log_file)
         file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
         logger.addHandler(file_handler)
