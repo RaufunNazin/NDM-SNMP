@@ -19,7 +19,7 @@ def setup_logging(debug_mode):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     if debug_mode:
-        debug.set_logger(debug.Debug('all'))
+        debug.setLogger(debug.Debug('all'))
 
 def main(debug_mode):
     setup_logging(debug_mode)
