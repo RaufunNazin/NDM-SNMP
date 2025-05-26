@@ -19,9 +19,8 @@ def setup_logging(debug_mode):
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     if debug_mode:
-        debug.set_logger(debug.Debug('all'))
-    else:
-        debug.set_logger(None)
+        debug.setLogger(debug.get_current_logger())
+        debug.setLevel('all')
 
 def main(debug_mode):
     setup_logging(debug_mode)
