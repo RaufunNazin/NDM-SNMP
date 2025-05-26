@@ -5,6 +5,7 @@ from pysnmp.hlapi.v3arch.asyncio import *
 import time
 import os
 from enums import COMPILED_MIBS
+from pysmi import debug
 import cx_Oracle
 
 # Cache singleton
@@ -114,6 +115,17 @@ async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_r
         ObjectType(ObjectIdentity(oid)),
         lexicographicMode=False
     )
+    
+    log_file = 'snmpdebug.log'
+    logger = logging.getLogger('pysmi')
+    logger.setLevel(logging.DEBUG if debug_mode else logging.INFO)
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG if debug_mode else logging.INFO)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    if debug_mode:
+        debug.set_logger(debug.Debug('all'))
     
     # Process the response from the SNMP walk
     async for errorIndication, errorStatus, errorIndex, varBinds in objects:

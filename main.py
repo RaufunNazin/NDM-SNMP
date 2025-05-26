@@ -34,7 +34,8 @@ cx_Oracle.init_oracle_client(lib_dir=instant_client)
 
 # Run and display
 async def main():
-    parser = argparse.ArgumentParser(description='Process ONU data from SNMP output and insert into database')
+    parser = argpar
+    se.ArgumentParser(description='Process ONU data from SNMP output and insert into database')
     parser.add_argument('-d', '--dry-run', action='store_true', help='Parse data but do not insert into database')
     args = parser.parse_args()
     print("Running SNMP walk...")
