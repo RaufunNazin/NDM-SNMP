@@ -49,6 +49,7 @@ def load_mibs():
             print(f"Warning: Could not load MIB {mib}: {e}")
 
     _mib_cache = mib_builder
+    print(mib_builder.mibSymbols.keys())
 
     print(f"MIB Load complete in {time.time() - start_time:.2f} seconds.")
     return mib_builder
