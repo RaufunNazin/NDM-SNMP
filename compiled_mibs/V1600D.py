@@ -8,7 +8,7 @@
 # Notes
 # -----
 # ASN.1 source file://mibs/V1600D
-# Produced by pysmi-1.6.1 at Mon May 26 12:46:55 2025
+# Produced by pysmi-1.6.1 at Mon May 26 15:14:57 2025
 # On host computerfuture platform Linux version 3.10.0-1160.el7.x86_64 by user srizon
 # Using Python version 3.10.9 (main, May  6 2025, 17:33:02) [GCC 4.8.5 20150623 (Red Hat 4.8.5-44)]
 
