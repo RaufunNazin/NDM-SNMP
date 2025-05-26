@@ -24,8 +24,6 @@ def setup_logging(debug_mode):
         debug_instance = debug.Debug('all')
         # Pass this Debug instance to set_logger
         debug.set_logger(debug_instance)
-        # Also set the global debug level
-        debug.setLevel('all')
 
 
 def main(debug_mode):
