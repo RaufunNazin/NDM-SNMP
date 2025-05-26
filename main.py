@@ -55,6 +55,7 @@ async def main():
         f.close()
     print(f"SNMP output saved to {output_file}")
     print("Parsing SNMP output...")
+    print(snmp_data_str)
     
     # Parse the SNMP output
     parsed_snmp_output = parse_onu_data(snmp_data_str)
