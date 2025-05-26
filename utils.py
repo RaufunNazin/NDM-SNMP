@@ -13,7 +13,7 @@ from mib_compiler import setup_logging
 _mib_cache = None
 
 # Required MIBs mapping (add as needed)
-BRAND_MIB_MAP = ['IF-MIB', 'SNMPv2-MIB','NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB']
+BRAND_MIB_MAP = ['IF-MIB', 'SNMPv2-MIB','NSCRTV-FTTX-EPON-MIB', 'NSCRTV-FTTX-GPON-MIB', 'V1600D']
 
 # Function to load MIBs
 def load_mibs():
