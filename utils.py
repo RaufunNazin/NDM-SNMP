@@ -118,16 +118,16 @@ async def snmp_walk(ip, community, oid, port, snmp_version, snmp_timeout, snmp_r
         lexicographicMode=False
     )
     
-    log_file = 'snmpdebug.log'
-    logger = logging.getLogger('pysmi')
-    logger.setLevel(logging.DEBUG if debug_mode else logging.INFO)
-    file_handler = logging.FileHandler(log_file)
-    file_handler.setLevel(logging.DEBUG if debug_mode else logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
     if debug_mode:
-        debug.set_logger(debug.Debug('all'))
+        log_file = 'snmpdebug.log'
+        debug_logger = debug.Debug('all')
+        debug.setLogger(debug_logger)
+
+        # Optionally redirect to your logging setup
+        logger = logging.getLogger('pysmi')
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(message)s'))
+        logger.addHandler(file_handler)
     
     # Process the response from the SNMP walk
     async for errorIndication, errorStatus, errorIndex, varBinds in objects:
