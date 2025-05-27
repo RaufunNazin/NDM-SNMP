@@ -117,36 +117,34 @@ def parse_mac_table_vsol(text):
     
     mac_entries = []
     
-    # Updated pattern to match the actual table format
-    # Looking for lines that start with MAC address format (xxxx.xxxx.xxxx)
-    pattern = re.compile(
-        r"^\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+" +  # MAC address
-        r"(\d+)\s+" +                                          # VLAN
-        r"(\S+)\s+" +                                          # Type (Dynamic)
-        r"(GPON\d+/\d+:\d+)\s+" +                             # Port (GPON0/1:18)
-        r"(\d+)\s+" +                                          # Gem_index
-        r"(\d+)\s+" +                                          # Gem_id
-        r"(\S+)\s*$",                                          # Info/Serial
-        re.IGNORECASE
-    )
-    
+    # Split text into lines and rejoin to handle any preprocessing issues
+    # Look for the actual table data section
     lines = text.strip().splitlines()
     
+    # Find lines that contain the full table data
+    table_started = False
+    current_entry = []
+    
     for line_num, line in enumerate(lines):
-        # Skip empty lines and lines that don't contain MAC addresses
-        if not line.strip():
-            continue
+        line = line.strip()
         
-        # Skip lines that don't start with a MAC address pattern
-        if not re.match(r'^\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}', line.strip(), re.IGNORECASE):
+        # Skip empty lines
+        if not line:
             continue
             
-        match = pattern.match(line.strip())
-        if match:
+        # Check if this line starts with a MAC address
+        if re.match(r'^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$', line, re.IGNORECASE):
+            # This is just a MAC address, start collecting the entry
+            current_entry = [line]
+            continue
+            
+        # Check if this line contains a complete MAC table entry
+        mac_match = re.match(r'^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+(\w+)\s+(\S+)', line, re.IGNORECASE)
+        if mac_match:
             try:
-                raw_mac = match.group(1).upper()
-                vlan = int(match.group(2))
-                raw_port = match.group(4)
+                raw_mac = mac_match.group(1).upper()
+                vlan = int(mac_match.group(2))
+                raw_port = mac_match.group(4)
                 
                 # Convert MAC from xxxx.xxxx.xxxx to xx:xx:xx:xx:xx:xx
                 mac = ':'.join([
@@ -157,7 +155,7 @@ def parse_mac_table_vsol(text):
                 
                 # Convert port - flexible parsing for any format like XXXX0/1:18
                 port = raw_port
-                port_match = re.match(r"(\w+)(\d+)/(\d+):(\d+)", raw_port)
+                port_match = re.match(r'(\w+)(\d+)/(\d+):(\d+)', raw_port)
                 if port_match:
                     port = f"{port_match.group(2)}/{port_match.group(3)}/{port_match.group(4)}"
                 
@@ -168,18 +166,50 @@ def parse_mac_table_vsol(text):
                 })
                 
             except (ValueError, IndexError) as e:
-                print(f"[!] Error parsing line {line_num + 1}: {line.strip()}")
+                print(f"[!] Error parsing line {line_num + 1}: {line}")
                 print(f"[!] Error details: {e}")
                 continue
-        else:
-            # Debug: show lines that don't match and contain potential MAC addresses
-            if re.match(r'^\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}', line.strip(), re.IGNORECASE):
-                print(f"[!] No match for line {line_num + 1}: '{line}'")
-                print(f"    Repr: {repr(line)}")
-                # Try to split by whitespace to see the structure
-                parts = line.split()
-                print(f"    Split parts: {parts}")
-                print()
+        
+        # If we have a partial entry (just MAC) and this line might contain VLAN/port info
+        elif current_entry and len(current_entry) == 1:
+            # Try to find VLAN and port in subsequent lines
+            parts = line.split()
+            if len(parts) >= 3 and parts[0].isdigit():  # First part is VLAN
+                try:
+                    vlan = int(parts[0])
+                    # Look for port pattern in the parts
+                    port_found = None
+                    for part in parts:
+                        if re.match(r'\w+\d+/\d+:\d+', part):
+                            port_found = part
+                            break
+                    
+                    if port_found:
+                        raw_mac = current_entry[0].upper()
+                        
+                        # Convert MAC from xxxx.xxxx.xxxx to xx:xx:xx:xx:xx:xx
+                        mac = ':'.join([
+                            raw_mac[0:2], raw_mac[2:4],
+                            raw_mac[5:7], raw_mac[7:9],
+                            raw_mac[10:12], raw_mac[12:14]
+                        ])
+                        
+                        # Convert port
+                        port = port_found
+                        port_match = re.match(r'(\w+)(\d+)/(\d+):(\d+)', port_found)
+                        if port_match:
+                            port = f"{port_match.group(2)}/{port_match.group(3)}/{port_match.group(4)}"
+                        
+                        mac_entries.append({
+                            'mac': mac,
+                            'vlan': vlan,
+                            'port': port
+                        })
+                        
+                        current_entry = []  # Reset for next entry
+                        
+                except (ValueError, IndexError):
+                    continue
     
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
