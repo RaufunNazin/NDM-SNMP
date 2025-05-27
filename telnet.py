@@ -114,51 +114,68 @@ def parse_mac_table_cdata(text):
 
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
-    print(text)
+    
     mac_entries = []
-
+    
+    # Updated pattern to match the actual table format
+    # Looking for lines that start with MAC address format (xxxx.xxxx.xxxx)
     pattern = re.compile(
-        r"^\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
-        r"(\d+)\s+"                                        # VLAN
-        r"(\S+)\s+"                                        # Type
-        r"(\S+)\s+"                                        # Port
-        r"(\d+)\s+"                                        # Gem_index
-        r"(\d+)\s+"                                        # Gem_id
-        r"(.+?)\s*$"                                       # Info (more flexible)
-        , re.IGNORECASE
+        r"^\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+" +  # MAC address
+        r"(\d+)\s+" +                                          # VLAN
+        r"(\S+)\s+" +                                          # Type (Dynamic)
+        r"(GPON\d+/\d+:\d+)\s+" +                             # Port (GPON0/1:18)
+        r"(\d+)\s+" +                                          # Gem_index
+        r"(\d+)\s+" +                                          # Gem_id
+        r"(\S+)\s*$",                                          # Info/Serial
+        re.IGNORECASE
     )
-
+    
     lines = text.strip().splitlines()
-    for line in lines:
-
-        match = pattern.match(line)
+    
+    for line_num, line in enumerate(lines):
+        # Skip empty lines and lines that don't contain MAC addresses
+        if not line.strip():
+            continue
+        
+        # Skip lines that don't start with a MAC address pattern
+        if not re.match(r'^\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}', line.strip(), re.IGNORECASE):
+            continue
+            
+        match = pattern.match(line.strip())
         if match:
-            raw_mac = match.group(1).upper()
-            vlan = int(match.group(2))
-            raw_port = match.group(4)
-
-            # Correct MAC conversion (xxxx.xxxx.xxxx to xx:xx:xx:xx:xx:xx)
-            # MAC has 14 chars: indices 0-3,5-8,10-13 (with dots at 4 and 9)
-            # So extract pairs accordingly:
-            mac = ':'.join([
-                raw_mac[0:2], raw_mac[2:4],
-                raw_mac[5:7], raw_mac[7:9],
-                raw_mac[10:12], raw_mac[12:14]
-            ])
-
-            # Flexible port parsing GPON0/1:18 -> 0/1/18 or keep as is
-            # Let's convert GPON0/1:18 -> 0/1/18 (strip GPON prefix)
-            port = raw_port
-            port_match = re.match(r"(\w+)(\d+)/(\d+):(\d+)", raw_port)
-            if port_match:
-                port = f"{port_match.group(2)}/{port_match.group(3)}/{port_match.group(4)}"
-
-            mac_entries.append({
-                'mac': mac,
-                'vlan': vlan,
-                'port': port
-            })
-    # Return list of dictionaries with MAC, VLAN, and Port
+            try:
+                raw_mac = match.group(1).upper()
+                vlan = int(match.group(2))
+                raw_port = match.group(4)
+                
+                # Convert MAC from xxxx.xxxx.xxxx to xx:xx:xx:xx:xx:xx
+                mac = ':'.join([
+                    raw_mac[0:2], raw_mac[2:4],    # First 4 chars
+                    raw_mac[5:7], raw_mac[7:9],    # Next 4 chars (skip dot at index 4)
+                    raw_mac[10:12], raw_mac[12:14] # Last 4 chars (skip dot at index 9)
+                ])
+                
+                # Convert port - flexible parsing for any format like XXXX0/1:18
+                port = raw_port
+                port_match = re.match(r"(\w+)(\d+)/(\d+):(\d+)", raw_port)
+                if port_match:
+                    port = f"{port_match.group(2)}/{port_match.group(3)}/{port_match.group(4)}"
+                
+                mac_entries.append({
+                    'mac': mac,
+                    'vlan': vlan,
+                    'port': port
+                })
+                
+            except (ValueError, IndexError) as e:
+                print(f"[!] Error parsing line {line_num + 1}: {line.strip()}")
+                print(f"[!] Error details: {e}")
+                continue
+        else:
+            # Debug: show lines that don't match and contain potential MAC addresses
+            if re.match(r'^\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}', line.strip(), re.IGNORECASE):
+                print(f"[!] No match for line {line_num + 1}: {line.strip()}")
+    
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
 
