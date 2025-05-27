@@ -153,11 +153,11 @@ def main():
 
         print("[+] Waiting for username prompt...")
         tn.read_until(b"Username:", timeout=5)
-        tn.write(USERNAME.encode("ascii") + b"\n")
+        tn.write(USERNAME + b"\n")
 
         print("[+] Waiting for password prompt...")
         tn.read_until(b"Password:", timeout=5)
-        tn.write(PASSWORD.encode("ascii") + b"\n")
+        tn.write(PASSWORD + b"\n")
 
         time.sleep(1)
         prompt = detect_prompt(tn)
@@ -166,17 +166,19 @@ def main():
         flush_extra_output(tn)
 
         # Enable mode
-        tn.write(commands["enable"].encode("ascii") + b"\n")
+        tn.write(commands["enable"] + b"\n")
+        print("[+] Entering enable mode...")
         time.sleep(1)
         flush_extra_output(tn)
 
         # Config mode (if needed)
-        tn.write(commands["config"].encode("ascii") + b"\n")
+        tn.write(commands["config"] + b"\n")
+        print("[+] Entering config mode...")
         time.sleep(1)
         flush_extra_output(tn)
 
         # Show MAC table
-        output = send_command_with_prompt_and_pagination(tn, commands["show_mac"].encode("ascii"), prompt, commands["pagination_text"].encode("ascii"))
+        output = send_command_with_prompt_and_pagination(tn, commands["show_mac"], prompt, commands["pagination_text"])
         print("\n[+] Full output:\n")
         print(output)
         print("----------------------------------------------------")
