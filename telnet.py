@@ -201,9 +201,9 @@ def parse_mac_table_vsol(text):
                             port = f"{port_match.group(2)}/{port_match.group(3)}/{port_match.group(4)}"
                         
                         mac_entries.append({
-                            'mac': mac,
-                            'vlan': vlan,
-                            'port': port
+                            'mac': mac or None,
+                            'vlan': vlan or None,
+                            'port': port or None
                         })
                         
                         current_entry = []  # Reset for next entry
