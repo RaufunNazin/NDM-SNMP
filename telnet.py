@@ -66,7 +66,7 @@ def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
     output = b""
 
     while True:
-        chunk = tn.read_until(more_prompt, timeout=5)
+        chunk = tn.read_until(more_prompt.encode("ascii"), timeout=5)
         output += chunk
         if more_prompt in chunk:
             print("[+] More data found, sending SPACE")
