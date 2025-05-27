@@ -113,6 +113,8 @@ def parse_mac_table_cdata(text):
     return mac_entries
 
 def parse_mac_table_vsol(text):
+    print("[+] Parsing MAC table for VSOL vendor...")
+    print(text)
     mac_entries = []
 
     pattern = re.compile(
