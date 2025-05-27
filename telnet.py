@@ -166,13 +166,13 @@ def main():
         flush_extra_output(tn)
 
         # Enable mode
-        tn.write(commands["enable"] + b"\n")
+        tn.write(commands["enable"].encode("ascii") + b"\n")
         print("[+] Entering enable mode...")
         time.sleep(1)
         flush_extra_output(tn)
 
         # Config mode (if needed)
-        tn.write(commands["config"] + b"\n")
+        tn.write(commands["config"].encode("ascii") + b"\n")
         print("[+] Entering config mode...")
         time.sleep(1)
         flush_extra_output(tn)
