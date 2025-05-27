@@ -174,7 +174,12 @@ def parse_mac_table_vsol(text):
         else:
             # Debug: show lines that don't match and contain potential MAC addresses
             if re.match(r'^\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}', line.strip(), re.IGNORECASE):
-                print(f"[!] No match for line {line_num + 1}: {line.strip()}")
+                print(f"[!] No match for line {line_num + 1}: '{line}'")
+                print(f"    Repr: {repr(line)}")
+                # Try to split by whitespace to see the structure
+                parts = line.split()
+                print(f"    Split parts: {parts}")
+                print()
     
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
