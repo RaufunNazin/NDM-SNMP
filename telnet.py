@@ -119,19 +119,15 @@ def parse_mac_table_vsol(text):
         r"^\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
         r"(\d+)\s+"                                        # VLAN
         r"(\S+)\s+"                                        # Type
-        r"(\S+)\s+"                                        # Port (e.g. GPON0/1:18)
+        r"(\S+)\s+"                                        # Port
         r"(\d+)\s+"                                        # Gem_index
         r"(\d+)\s+"                                        # Gem_id
-        r"(\S+)\s*$"                                       # Info
+        r"(.+?)\s*$"                                       # Info (more flexible)
         , re.IGNORECASE
     )
 
     lines = text.strip().splitlines()
-    data_lines = [line for line in lines if re.match(r"^\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s*$", line)]
-    for line in data_lines:
-        # Skip header lines and summary lines
-        if not line or line.startswith("Mac Address") or line.startswith("Addresses") or line.startswith("---"):
-            continue
+    for line in lines:
 
         match = pattern.match(line)
         if match:
