@@ -153,11 +153,11 @@ def main():
 
         print("[+] Waiting for username prompt...")
         tn.read_until(b"Username:", timeout=5)
-        tn.write(USERNAME + b"\n")
+        tn.write(USERNAME.encode("ascii") + b"\n")
 
         print("[+] Waiting for password prompt...")
         tn.read_until(b"Password:", timeout=5)
-        tn.write(PASSWORD + b"\n")
+        tn.write(PASSWORD.encode("ascii") + b"\n")
 
         time.sleep(1)
         prompt = detect_prompt(tn)
