@@ -116,44 +116,47 @@ def parse_mac_table_vsol(text):
     mac_entries = []
 
     pattern = re.compile(
-        r"\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
-        r"(\d+)\s+"                                       # VLAN
-        r"(\S+)\s+"                                       # Type
-        r"(\S+)\s+"                                       # Port (any prefix)
-        r"(\d+)\s+"                                       # Gem_index
-        r"(\d+)\s+"                                       # Gem_id
-        r"(\S+)"                                          # Info
+        r"^\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
+        r"(\d+)\s+"                                        # VLAN
+        r"(\S+)\s+"                                        # Type
+        r"(\S+)\s+"                                        # Port (e.g. GPON0/1:18)
+        r"(\d+)\s+"                                        # Gem_index
+        r"(\d+)\s+"                                        # Gem_id
+        r"(\S+)\s*$"                                       # Info
+        , re.IGNORECASE
     )
 
     lines = text.strip().splitlines()
     for line in lines:
+        # Skip header lines and summary lines
+        if not line or line.startswith("Mac Address") or line.startswith("Addresses") or line.startswith("---"):
+            continue
+
         match = pattern.match(line)
         if match:
-            raw_mac = match.group(1)
+            raw_mac = match.group(1).lower()
             vlan = int(match.group(2))
+            # type_field = match.group(3)  # unused currently
             raw_port = match.group(4)
+            # gem_index = match.group(5)  # unused currently
+            # gem_id = match.group(6)     # unused currently
+            # info = match.group(7)       # unused currently
 
-            # Convert xxxx.xxxx.xxxx → xx:xx:xx:xx:xx:xx
+            # Correct MAC conversion (xxxx.xxxx.xxxx to xx:xx:xx:xx:xx:xx)
+            # MAC has 14 chars: indices 0-3,5-8,10-13 (with dots at 4 and 9)
+            # So extract pairs accordingly:
             mac = ':'.join([
                 raw_mac[0:2], raw_mac[2:4],
                 raw_mac[5:7], raw_mac[7:9],
                 raw_mac[10:12], raw_mac[12:14]
             ])
 
-            # Flexible port parsing
-            if '/' in raw_port and ':' in raw_port:
-                prefix_section, last_section = raw_port.split(':')
-                prefix_parts = prefix_section.split('/')
-                first_digit = re.search(r'\d+', prefix_parts[0])
-                second_digit = re.search(r'\d+', prefix_parts[1]) if len(prefix_parts) > 1 else '0'
-                third_digit = last_section
-
-                if first_digit and second_digit:
-                    port = f"{first_digit.group()}/{second_digit.group()}/{third_digit}"
-                else:
-                    port = raw_port  # fallback if regex fails
-            else:
-                port = raw_port
+            # Flexible port parsing GPON0/1:18 -> 0/1/18 or keep as is
+            # Let's convert GPON0/1:18 -> 0/1/18 (strip GPON prefix)
+            port = raw_port
+            gpon_match = re.match(r"GPON(\d+)/(\d+):(\d+)", raw_port)
+            if gpon_match:
+                port = f"{gpon_match.group(1)}/{gpon_match.group(2)}/{gpon_match.group(3)}"
 
             mac_entries.append({
                 'mac': mac,
