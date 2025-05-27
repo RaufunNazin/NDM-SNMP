@@ -170,6 +170,10 @@ def main():
 
         # Enable mode
         tn.write(commands["enable"].encode("ascii") + b"\n")
+        index, match, response = tn.expect([b'Password:', prompt], timeout=5)
+        if index == 0:
+            tn.write(PASSWORD.encode('ascii') + b'\n')
+            tn.read_until(prompt, timeout=5)
         print("[+] Entering enable mode...")
         time.sleep(1)
         flush_extra_output(tn)
