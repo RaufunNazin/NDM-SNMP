@@ -75,7 +75,7 @@ def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
             print("[+] More data found, sending SPACE")
             tn.write(b" ")
         else:
-            remaining = tn.read_until(prompt_bytes, timeout=10)
+            remaining = tn.read_until(prompt_bytes, timeout=5)
             output += remaining
             break
     return output.decode("utf-8", errors="ignore")
@@ -113,8 +113,55 @@ def parse_mac_table_cdata(text):
     return mac_entries
 
 def parse_mac_table_vsol(text):
-    # Add VSOL-specific parsing logic here later
-    pass
+    mac_entries = []
+
+    pattern = re.compile(
+        r"\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
+        r"(\d+)\s+"                                       # VLAN
+        r"(\S+)\s+"                                       # Type
+        r"(\S+)\s+"                                       # Port (any prefix)
+        r"(\d+)\s+"                                       # Gem_index
+        r"(\d+)\s+"                                       # Gem_id
+        r"(\S+)"                                          # Info
+    )
+
+    lines = text.strip().splitlines()
+    for line in lines:
+        match = pattern.match(line)
+        if match:
+            raw_mac = match.group(1)
+            vlan = int(match.group(2))
+            raw_port = match.group(4)
+
+            # Convert xxxx.xxxx.xxxx → xx:xx:xx:xx:xx:xx
+            mac = ':'.join([
+                raw_mac[0:2], raw_mac[2:4],
+                raw_mac[5:7], raw_mac[7:9],
+                raw_mac[10:12], raw_mac[12:14]
+            ])
+
+            # Flexible port parsing
+            if '/' in raw_port and ':' in raw_port:
+                prefix_section, last_section = raw_port.split(':')
+                prefix_parts = prefix_section.split('/')
+                first_digit = re.search(r'\d+', prefix_parts[0])
+                second_digit = re.search(r'\d+', prefix_parts[1]) if len(prefix_parts) > 1 else '0'
+                third_digit = last_section
+
+                if first_digit and second_digit:
+                    port = f"{first_digit.group()}/{second_digit.group()}/{third_digit}"
+                else:
+                    port = raw_port  # fallback if regex fails
+            else:
+                port = raw_port
+
+            mac_entries.append({
+                'mac': mac,
+                'vlan': vlan,
+                'port': port
+            })
+
+    return mac_entries
 
 def get_parser_for_vendor(vendor):
     if vendor == CDATA_GPON:
