@@ -163,7 +163,8 @@ def parse_mac_table_vsol(text):
                 'vlan': vlan,
                 'port': port
             })
-
+    # Return list of dictionaries with MAC, VLAN, and Port
+    print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
 
 def get_parser_for_vendor(vendor):
