@@ -127,7 +127,8 @@ def parse_mac_table_vsol(text):
     )
 
     lines = text.strip().splitlines()
-    for line in lines:
+    data_lines = [line for line in lines if re.match(r"\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}", line)]
+    for line in data_lines:
         # Skip header lines and summary lines
         if not line or line.startswith("Mac Address") or line.startswith("Addresses") or line.startswith("---"):
             continue
@@ -136,11 +137,7 @@ def parse_mac_table_vsol(text):
         if match:
             raw_mac = match.group(1).lower()
             vlan = int(match.group(2))
-            # type_field = match.group(3)  # unused currently
             raw_port = match.group(4)
-            # gem_index = match.group(5)  # unused currently
-            # gem_id = match.group(6)     # unused currently
-            # info = match.group(7)       # unused currently
 
             # Correct MAC conversion (xxxx.xxxx.xxxx to xx:xx:xx:xx:xx:xx)
             # MAC has 14 chars: indices 0-3,5-8,10-13 (with dots at 4 and 9)
@@ -154,9 +151,9 @@ def parse_mac_table_vsol(text):
             # Flexible port parsing GPON0/1:18 -> 0/1/18 or keep as is
             # Let's convert GPON0/1:18 -> 0/1/18 (strip GPON prefix)
             port = raw_port
-            gpon_match = re.match(r"GPON(\d+)/(\d+):(\d+)", raw_port)
-            if gpon_match:
-                port = f"{gpon_match.group(1)}/{gpon_match.group(2)}/{gpon_match.group(3)}"
+            port_match = re.match(r"(\w+)(\d+)/(\d+):(\d+)", raw_port)
+            if port_match:
+                port = f"{port_match.group(2)}/{port_match.group(3)}/{port_match.group(4)}"
 
             mac_entries.append({
                 'mac': mac,
