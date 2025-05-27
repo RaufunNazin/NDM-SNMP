@@ -5,6 +5,8 @@ import argparse
 import os
 from dotenv import load_dotenv
 from utils import insert_into_db_olt_customer_mac
+from enums import CDATA_EPON, CDATA_GPON, VSOL_EPON, VSOL_GPON
+
 
 # Load environment variables from .env file
 load_dotenv()
@@ -15,7 +17,30 @@ db_user = os.getenv("DB_USER")
 db_pass = os.getenv("DB_PASS")
 db_sid = os.getenv("DB_SID")
 
-MORE_PROMPT = b"--More ( Press 'Q' to quit )--"
+# ----------------- VENDOR COMMAND CONFIG -----------------
+
+VENDOR_COMMANDS = {
+    CDATA_GPON: {
+        "enable": "enable",
+        "config": "config",
+        "show_mac": "show mac-address all",
+        "pagination_text": "--More ( Press 'Q' to quit )--"
+    },
+    VSOL_EPON: {
+        "enable": "enable",  # Example; replace as needed
+        "config": "config",  # Example; replace as needed
+        "show_mac": "show mac-address all",  # Example; replace as needed
+        "pagination_text": "--More--"
+    },
+    VSOL_GPON: {
+        "enable": "enable",  # Example; replace as needed
+        "config": "configure terminal",  # Example; replace as needed
+        "show_mac": "show mac address-table pon",  # Example; replace as needed
+        "pagination_text": "--More--"
+    }
+}
+
+# ----------------- CORE TELNET FUNCTIONS -----------------
 
 def detect_prompt(tn):
     tn.write(b"\n")
@@ -30,18 +55,13 @@ def detect_prompt(tn):
     raise ValueError("Failed to detect device prompt.")
 
 def flush_extra_output(tn):
-    tn.write(b"\n")
-    tn.write(b"\n")
-    tn.write(b"\n")
-    _ = tn.read_very_eager()  # Discard junk
-    
-def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt=MORE_PROMPT):
+    tn.write(b"\n" * 3)
+    _ = tn.read_very_eager()
+
+def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
     print(f"[+] Sending command: {command}")
-    
     flush_extra_output(tn)
     time.sleep(1)
-
-    # Send the command
     tn.write(command.encode('ascii') + b"\n")
     output = b""
 
@@ -52,13 +72,14 @@ def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt=MOR
             print("[+] More data found, sending SPACE")
             tn.write(b" ")
         else:
-            # Ensure final prompt is received
             remaining = tn.read_until(prompt, timeout=10)
             output += remaining
             break
     return output.decode("utf-8", errors="ignore")
 
-def parse_mac_table(text):
+# ----------------- PARSING PLACEHOLDER FUNCTIONS -----------------
+
+def parse_mac_table_cdata(text):
     mac_entries = []
 
     # Skip lines before data starts
@@ -87,22 +108,44 @@ def parse_mac_table(text):
             })
 
     return mac_entries
-        
+
+def parse_mac_table_vsol(text):
+    # Add VSOL-specific parsing logic here later
+    pass
+
+def get_parser_for_vendor(vendor):
+    if vendor == CDATA_GPON:
+        return parse_mac_table_cdata
+    elif vendor in [VSOL_EPON, VSOL_GPON]:
+        return parse_mac_table_vsol
+    else:
+        raise ValueError(f"Unsupported vendor: {vendor}")
+
+# ----------------- MAIN LOGIC -----------------
+
 def main():
     parser = argparse.ArgumentParser(description="Telnet MAC Address Table Fetcher")
     parser.add_argument("-i", required=True, help="Target device IP address")
     parser.add_argument("-p", type=int, default=23, help="Telnet port (default: 23)")
     parser.add_argument("-u", required=True, help="Username for telnet login")
     parser.add_argument("-ps", required=True, help="Password for telnet login")
+    parser.add_argument("-v", "--vendor", required=True, help="Vendor identifier (e.g., CDATA-GPON, VSOL-EPON, VSOL-GPON)")
     parser.add_argument('-d', '--dry-run', action='store_true', help='Parse data but do not insert into database')
-    
+
     args = parser.parse_args()
-    
     HOST = args.i
     PORT = args.p
     USERNAME = args.u
     PASSWORD = args.ps
-    
+    VENDOR = args.vendor.upper()
+
+    if VENDOR not in VENDOR_COMMANDS:
+        print(f"[-] Vendor '{VENDOR}' not supported.")
+        return
+
+    commands = VENDOR_COMMANDS[VENDOR]
+    parse_function = get_parser_for_vendor(VENDOR)
+
     try:
         print(f"[+] Connecting to {HOST}:{PORT} ...")
         tn = telnetlib.Telnet(HOST, PORT, timeout=10)
@@ -110,58 +153,41 @@ def main():
 
         print("[+] Waiting for username prompt...")
         tn.read_until(b"Username:", timeout=5)
-        print("[+] Got username prompt.")
         tn.write(USERNAME.encode("ascii") + b"\n")
 
         print("[+] Waiting for password prompt...")
         tn.read_until(b"Password:", timeout=5)
-        print("[+] Got password prompt.")
         tn.write(PASSWORD.encode("ascii") + b"\n")
 
-        time.sleep(1)  # wait for prompt to appear
+        time.sleep(1)
         prompt = detect_prompt(tn)
         print(f"[+] Detected prompt: {prompt.decode()}")
 
-        # Flush any extra output
-        print("[+] Flushing extra output...")
         flush_extra_output(tn)
-        print("[+] Flushed extra output.")
-        
-        # Enter enable mode
-        print("[+] Sending 'enable' command...")
-        tn.write(b"enable\n")
-        time.sleep(1)
-        
-        # Flush any extra output
-        print("[+] Flushing extra output...")
-        flush_extra_output(tn)
-        print("[+] Flushed extra output.")
 
-        # Optionally go to config if needed
-        tn.write(b"config\n")
+        # Enable mode
+        tn.write(commands["enable"].encode("ascii") + b"\n")
         time.sleep(1)
-        
-        # Flush any extra output
-        print("[+] Flushing extra output...")
         flush_extra_output(tn)
-        print("[+] Flushed extra output.")
 
-        # Run the target command with pagination support
-        output = send_command_with_prompt_and_pagination(tn, "show mac-address all", prompt)
-        print("\n[+] Full output of 'show mac-address all':\n")
-        
+        # Config mode (if needed)
+        tn.write(commands["config"].encode("ascii") + b"\n")
+        time.sleep(1)
+        flush_extra_output(tn)
+
+        # Show MAC table
+        output = send_command_with_prompt_and_pagination(tn, commands["show_mac"].encode("ascii"), prompt, commands["pagination_text"].encode("ascii"))
+        print("\n[+] Full output:\n")
         print(output)
-        
         print("----------------------------------------------------")
 
-        parsed_output = parse_mac_table(output)
+        # Parse based on vendor
+        parsed_output = parse_function(output)
         for entry in parsed_output:
-                print(entry)
+            print(entry)
 
-        print("[+] Session ended.")
         tn.close()
-        
-        # Insert into database unless dry run is specified
+
         if not args.dry_run:
             insert_into_db_olt_customer_mac(parsed_output, HOST, db_host, db_port, db_user, db_pass, db_sid)
         else:
