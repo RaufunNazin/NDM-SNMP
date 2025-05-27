@@ -64,15 +64,18 @@ def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
     time.sleep(1)
     tn.write(command.encode('ascii') + b"\n")
     output = b""
+    
+    more_prompt_bytes = more_prompt.encode("ascii")
+    prompt_bytes = prompt if isinstance(prompt, bytes) else prompt.encode("ascii")
 
     while True:
-        chunk = tn.read_until(more_prompt.encode("ascii"), timeout=5)
+        chunk = tn.read_until(more_prompt_bytes, timeout=5)
         output += chunk
-        if more_prompt in chunk:
+        if more_prompt_bytes in chunk:
             print("[+] More data found, sending SPACE")
             tn.write(b" ")
         else:
-            remaining = tn.read_until(prompt, timeout=10)
+            remaining = tn.read_until(prompt_bytes, timeout=10)
             output += remaining
             break
     return output.decode("utf-8", errors="ignore")
