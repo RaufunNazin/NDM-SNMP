@@ -127,7 +127,7 @@ def parse_mac_table_vsol(text):
     )
 
     lines = text.strip().splitlines()
-    data_lines = [line for line in lines if re.match(r"\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}", line)]
+    data_lines = [line for line in lines if re.match(r"^\s*([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+(\S+)\s+(\S+)\s+(\d+)\s+(\d+)\s+(\S+)\s*$", line)]
     for line in data_lines:
         # Skip header lines and summary lines
         if not line or line.startswith("Mac Address") or line.startswith("Addresses") or line.startswith("---"):
@@ -135,7 +135,7 @@ def parse_mac_table_vsol(text):
 
         match = pattern.match(line)
         if match:
-            raw_mac = match.group(1).lower()
+            raw_mac = match.group(1).upper()
             vlan = int(match.group(2))
             raw_port = match.group(4)
 
