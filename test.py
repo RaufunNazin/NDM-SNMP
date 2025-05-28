@@ -1,63 +1,45 @@
 import re
-import io
 
 with open('test.txt', 'r') as file:
     text = file.read()
     
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
-
+    
     mac_entries = []
-    text_stream = io.StringIO(text)
-    line_num = 0
-
-    for line in text_stream:
-        line_num += 1
+    lines = text.strip().splitlines()
+    
+    for line_num, line in enumerate(lines):
         line = line.strip()
-        if not line:
-            continue  # skip blank lines
-
-        parts = line.split()
-        # We expect at least 4 mandatory parts (MAC, VLAN, Type, Port)
-        if len(parts) < 4:
-            continue
-
-        # Check if the first part matches MAC format
-        if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", parts[0], re.IGNORECASE):
-            raw_mac = parts[0]
-            vlan = parts[1]
-            _type = parts[2]
-            raw_port = parts[3]
-
+        
+        # Skip empty or non-data lines
+        line_pattern = re.compile(r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$", re.IGNORECASE)
+        if line_pattern.match(line.strip()):
+            raw_mac, vlan, raw_port = line_pattern.match(line.strip()).groups()
+            
+            # Convert MAC to xx:xx:xx:xx:xx:xx
             clean_mac = raw_mac.replace('.', '').upper()
-            mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
+            mac = ':'.join([
+                clean_mac[i:i+2] for i in range(0, 12, 2)
+            ])
 
+            
+            # Extract port details like GPON0/1:18 → 1/18
             port = raw_port
             port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
             if port_match:
                 port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
-
-            # gem_index, gem_id, info are optional and can be present at positions 4,5,6+
-            gem_index = int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else None
-            gem_id = int(parts[5]) if len(parts) > 5 and parts[5].isdigit() else None
-            info = " ".join(parts[6:]) if len(parts) > 6 else None
-
+            
             mac_entries.append({
                 'mac': mac,
                 'vlan': int(vlan),
-                'type': _type,
-                'port': port,
-                'gem_index': gem_index,
-                'gem_id': gem_id,
-                'info': info,
+                'port': port
             })
         else:
-            print(f"[-] Line {line_num} does not start with a MAC address: '{line}'")
-
+            print(f"[-] Skipping line {line_num + 1}: '{line}' - does not match expected format.")
+    
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
     
 if __name__ == "__main__":
-    mac_entries = parse_mac_table_vsol(text)
-    for entry in mac_entries:
-        print(entry)
+    print(parse_mac_table_vsol(text))

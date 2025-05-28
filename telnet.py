@@ -62,14 +62,17 @@ def flush_extra_output(tn):
     tn.write(b"\n" * 3)
     _ = tn.read_very_eager()
     
-def clean_terminal_line(line):
-    # Remove ANSI codes
-    line = ansi_escape.sub('', line)
-    # Remove tabs
-    line = line.replace('\t', ' ')
-    # Collapse multiple spaces
-    line = re.sub(r'\s+', ' ', line)
-    return line.strip()
+def clean_terminal_text(text):
+    cleaned_lines = []
+    for line in text.splitlines():
+        # Remove ANSI codes
+        line = ansi_escape.sub('', line)
+        # Replace tabs with spaces
+        line = line.replace('\t', ' ')
+        # Collapse multiple spaces
+        line = re.sub(r'\s+', ' ', line)
+        cleaned_lines.append(line.strip())
+    return '\n'.join(cleaned_lines)
 
 def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
     print(f"[+] Sending command: {command}")
@@ -128,53 +131,40 @@ def parse_mac_table_cdata(text):
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
 
+    # Clean text first
+    text = clean_terminal_text(text)
+
     mac_entries = []
-    text_stream = io.StringIO(text)
-    line_num = 0
+    lines = text.strip().splitlines()
 
-    for line in text_stream:
-        line_num += 1
-        line = clean_terminal_line(line)
+    for line_num, line in enumerate(lines):
         line = line.strip()
-        if not line:
-            continue  # skip blank lines
 
-        parts = line.split()
-        # We expect at least 4 mandatory parts (MAC, VLAN, Type, Port)
-        if len(parts) < 4:
-            continue
+        line_pattern = re.compile(
+            r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"
+            r"(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$",
+            re.IGNORECASE
+        )
 
-        # Check if the first part matches MAC format
-        if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", parts[0], re.IGNORECASE):
-            raw_mac = parts[0]
-            vlan = parts[1]
-            _type = parts[2]
-            raw_port = parts[3]
+        match = line_pattern.match(line)
+        if match:
+            raw_mac, vlan, raw_port = match.groups()
 
             clean_mac = raw_mac.replace('.', '').upper()
-            mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
+            mac = ':'.join([clean_mac[i:i+2] for i in range(0, 12, 2)])
 
             port = raw_port
             port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
             if port_match:
                 port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
 
-            # gem_index, gem_id, info are optional and can be present at positions 4,5,6+
-            gem_index = int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else None
-            gem_id = int(parts[5]) if len(parts) > 5 and parts[5].isdigit() else None
-            info = " ".join(parts[6:]) if len(parts) > 6 else None
-
             mac_entries.append({
                 'mac': mac,
                 'vlan': int(vlan),
-                'type': _type,
-                'port': port,
-                'gem_index': gem_index,
-                'gem_id': gem_id,
-                'info': info,
+                'port': port
             })
         else:
-            print(f"[-] Line {line_num} does not start with a MAC address: '{line}'")
+            print(f"[-] Skipping line {line_num + 1}: '{line}' - does not match expected format.")
 
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
