@@ -114,52 +114,60 @@ def parse_mac_table_cdata(text):
 
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
-    
+
     mac_entries = []
     lines = text.strip().splitlines()
     i = 0
+    total_lines = len(lines)
 
-    while i < len(lines):
+    line_pattern = re.compile(
+        r"([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+",
+        re.IGNORECASE
+    )
+
+    while i < total_lines:
         line = lines[i].strip()
 
-        # Check if line has MAC pattern (basic)
-        if re.match(r"^\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}\s*$", line, re.IGNORECASE):
+        # If line looks like a MAC start line
+        if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", line, re.IGNORECASE):
             combined_line = line
-            # Combine next 6 lines if available
+            matched = False
+
+            # Try combining up to next 6 lines incrementally
             for j in range(1, 7):
-                if i + j < len(lines):
+                if i + j < total_lines:
                     combined_line += " " + lines[i + j].strip()
-            # Now apply full regex on combined_line
-            line_pattern = re.compile(
-                r"([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+",
-                re.IGNORECASE
-            )
-            match = line_pattern.match(combined_line)
-            if match:
-                raw_mac, vlan, raw_port = match.groups()
-                clean_mac = raw_mac.replace('.', '').upper()
-                mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
+                match = line_pattern.match(combined_line)
+                if match:
+                    raw_mac, vlan, raw_port = match.groups()
+                    clean_mac = raw_mac.replace('.', '').upper()
+                    mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
 
-                port = raw_port
-                port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
-                if port_match:
-                    port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
-                
-                mac_entries.append({
-                    'mac': mac,
-                    'vlan': int(vlan),
-                    'port': port
-                })
-                i += 7  # Skip over the 7 lines we just consumed
-                continue
-            else:
-                print(f"[-] Combined line starting at {i + 1} did not match pattern.")
-                print(line)
+                    port = raw_port
+                    port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
+                    if port_match:
+                        port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
 
-        i += 1
+                    mac_entries.append({
+                        'mac': mac,
+                        'vlan': int(vlan),
+                        'port': port
+                    })
+
+                    i += j + 1  # skip combined lines
+                    matched = True
+                    break
+
+            if not matched:
+                print(f"[-] Could not match combined lines starting at {i + 1}: '{combined_line}'")
+                i += 1
+
+        else:
+            i += 1
 
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
+
 
 def get_parser_for_vendor(vendor):
     if vendor == CDATA_GPON:
