@@ -78,7 +78,7 @@ def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
             remaining = tn.read_until(prompt_bytes, timeout=5)
             output += remaining
             break
-    return output.decode("utf-8", errors="ignore")
+    return output
 
 # ----------------- PARSING PLACEHOLDER FUNCTIONS -----------------
 
