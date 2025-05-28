@@ -127,47 +127,67 @@ def parse_mac_table_vsol(text):
     )
 
     text_stream = io.StringIO(text)
-    print(f'[+] Processing text stream with {len(text_stream.readlines())} lines.')
-    line_num = 0
-    record = []
+    current_record_lines = []
+
     for line in text_stream:
-        clean_line = line.strip()
-        if clean_line:  # skip empty lines
-            record.append(clean_line)
-            if len(record) == 6:
-                mac, vlan, typ, port, gem_idx, gem_id_info = record
-                print(f'{mac} | {vlan} | {typ} | {port} | {gem_idx} | {gem_id_info}')
-                record = []
-
-    for line in record:
-        line_num += 1
-        line = line.strip()
+        line = line.rstrip()
         if not line:
-            continue  # skip blank or whitespace-only lines
+            continue  # skip empty lines
 
-        parts = line.split()
-        if len(parts) == 0:
-            continue  # extra guard, though usually not needed
+        # Detect start of a new MAC record by MAC address pattern at line start
+        if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}", line, re.IGNORECASE):
+            # Process the previous record (if any)
+            if current_record_lines:
+                combined_line = ' '.join(current_record_lines)
+                combined_line = re.sub(r'\s+', ' ', combined_line)
+                match = line_pattern.match(combined_line)
+                if match:
+                    raw_mac, vlan, _type, raw_port = match.groups()
+                    clean_mac = raw_mac.replace('.', '').upper()
+                    mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
 
-        if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", parts[0], re.IGNORECASE):
-            match = line_pattern.match(line)
-            if match:
-                raw_mac, vlan, _type, raw_port = match.groups()
-                clean_mac = raw_mac.replace('.', '').upper()
-                mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
+                    port = raw_port
+                    port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
+                    if port_match:
+                        port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
 
-                port = raw_port
-                port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
-                if port_match:
-                    port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
+                    mac_entries.append({
+                        'mac': mac,
+                        'vlan': int(vlan),
+                        'port': port
+                    })
+                else:
+                    print(f"[-] Could not parse combined line: '{combined_line}'")
 
-                mac_entries.append({
-                    'mac': mac,
-                    'vlan': int(vlan),
-                    'port': port
-                })
-            else:
-                print(f"[-] Line {line_num} did not match pattern: '{line}'")
+                current_record_lines = []
+
+            current_record_lines.append(line)
+        else:
+            # Continue collecting lines for the current MAC record
+            current_record_lines.append(line)
+
+    # Process the last record
+    if current_record_lines:
+        combined_line = ' '.join(current_record_lines)
+        combined_line = re.sub(r'\s+', ' ', combined_line)
+        match = line_pattern.match(combined_line)
+        if match:
+            raw_mac, vlan, _type, raw_port = match.groups()
+            clean_mac = raw_mac.replace('.', '').upper()
+            mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
+
+            port = raw_port
+            port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
+            if port_match:
+                port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
+
+            mac_entries.append({
+                'mac': mac,
+                'vlan': int(vlan),
+                'port': port
+            })
+        else:
+            print(f"[-] Could not parse combined line: '{combined_line}'")
 
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
