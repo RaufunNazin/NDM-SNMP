@@ -65,14 +65,11 @@ def flush_extra_output(tn):
 def clean_terminal_text(text):
     cleaned_lines = []
     for line in text.splitlines():
-        # Remove ANSI codes
         line = ansi_escape.sub('', line)
-        # Replace tabs with spaces
         line = line.replace('\t', ' ')
-        # Collapse multiple spaces
         line = re.sub(r'\s+', ' ', line)
         cleaned_lines.append(line.strip())
-    return '\n'.join(cleaned_lines)
+    return cleaned_lines  # <- return as list of lines
 
 def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
     print(f"[+] Sending command: {command}")
@@ -131,43 +128,58 @@ def parse_mac_table_cdata(text):
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
 
-    # Clean text first
-    text = clean_terminal_text(text)
+    lines = clean_terminal_text(text)
 
     mac_entries = []
-    lines = text.strip().splitlines()
+    combined_line = ''
+    fields_collected = 0
 
     for line_num, line in enumerate(lines):
-        line = line.strip()
-
-        line_pattern = re.compile(
-            r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"
-            r"(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$",
-            re.IGNORECASE
-        )
-
-        match = line_pattern.match(line)
-        if match:
-            raw_mac, vlan, raw_port = match.groups()
-
-            clean_mac = raw_mac.replace('.', '').upper()
-            mac = ':'.join([clean_mac[i:i+2] for i in range(0, 12, 2)])
-
-            port = raw_port
-            port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
-            if port_match:
-                port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
-
-            mac_entries.append({
-                'mac': mac,
-                'vlan': int(vlan),
-                'port': port
-            })
+        if re.match(r'^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$', line, re.IGNORECASE):
+            # Start of new MAC entry
+            if combined_line and fields_collected >= 6:
+                mac_entries.append(parse_combined_line(combined_line))
+            combined_line = line
+            fields_collected = 1
         else:
-            print(f"[-] Skipping line {line_num + 1}: '{line}' - does not match expected format.")
+            combined_line += f' {line}'
+            fields_collected += 1
+
+    # Final pending entry
+    if combined_line and fields_collected >= 6:
+        mac_entries.append(parse_combined_line(combined_line))
 
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
+
+
+def parse_combined_line(line):
+    line_pattern = re.compile(
+        r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"
+        r"(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$",
+        re.IGNORECASE
+    )
+
+    match = line_pattern.match(line)
+    if match:
+        raw_mac, vlan, raw_port = match.groups()
+
+        clean_mac = raw_mac.replace('.', '').upper()
+        mac = ':'.join([clean_mac[i:i+2] for i in range(0, 12, 2)])
+
+        port = raw_port
+        port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
+        if port_match:
+            port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
+
+        return {
+            'mac': mac,
+            'vlan': int(vlan),
+            'port': port
+        }
+    else:
+        print(f"[-] Could not parse combined line: '{line}'")
+        return None
 
 
 
