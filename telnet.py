@@ -221,10 +221,11 @@ def main():
         output = send_command_with_prompt_and_pagination(tn, commands["show_mac"], prompt, commands["pagination_text"])
         print("\n[+] Full output:\n")
         print(output)
+        text_output = '\n'.join(output.splitlines())
         print("----------------------------------------------------")
 
         # Parse based on vendor
-        parsed_output = parse_function(output)
+        parsed_output = parse_function(text_output)
         for entry in parsed_output:
             print(entry)
 
