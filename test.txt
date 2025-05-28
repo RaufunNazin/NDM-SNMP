@@ -1,0 +1,14 @@
+VSOL-4-GPON(config)# 
+VSOL-4-GPON(config)# 
+VSOL-4-GPON(config)# 
+VSOL-4-GPON(config)# 
+VSOL-4-GPON(config)# 
+VSOL-4-GPON(config)# show mac address-table pon
+
+Mac Address Table
+
+Mac Address      Vlan        Type         GPON0/Pon:Onu       Gem_index           Gem_id         Info
+-----------------------------------------------------------------------------------------------------------
+Addresses of all pons Found: 55
+7cf1.7e5f.c1ab     325         Dynamic      GPON0/1:18	          1                  162        HWTC07185a20
+005f.6736.72fc     325         Dynamic      GPON0/1:14	          1                  158        VSOL00c61a21

@@ -122,7 +122,7 @@ def parse_mac_table_vsol(text):
         line = line.strip()
         
         # Skip empty or non-data lines
-        mac_pattern = re.compile(r"^[0-9a-fA-F]{4}\.[0-9a-fA-F]{4}\.[0-9a-fA-F]{4}$")
+        mac_pattern = re.compile(r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$", re.IGNORECASE)
         if not line or not mac_pattern.match(line.strip()):
             continue
         
