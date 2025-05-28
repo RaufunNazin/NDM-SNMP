@@ -173,9 +173,9 @@ def parse_combined_line(line):
             port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
 
         return {
-            'mac': mac,
-            'vlan': int(vlan),
-            'port': port
+            'MAC': mac,
+            'VLAN': int(vlan),
+            'Port': port
         }
 
 
@@ -249,18 +249,9 @@ def main():
 
         # Show MAC table
         output = send_command_with_prompt_and_pagination(tn, commands["show_mac"], prompt, commands["pagination_text"])
-        print("\n[+] Full output:\n")
-        print(output)
-        print("----------------------------------------------------")
-        
-        with open('mac_table_output.txt', 'w') as f:
-            f.write(output)
-            
-        with open('mac_table_output.txt', 'r') as f:
-            output_text = f.read()
 
         # Parse based on vendor
-        parsed_output = parse_function(output_text)
+        parsed_output = parse_function(output)
         for entry in parsed_output:
             print(entry)
 
