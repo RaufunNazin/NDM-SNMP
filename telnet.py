@@ -122,25 +122,21 @@ def parse_mac_table_vsol(text):
         line = line.strip()
         
         # Skip empty or non-data lines
-        mac_pattern = re.compile(r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$", re.IGNORECASE)
-        if not line or not mac_pattern.match(line.strip()):
+        line_pattern = re.compile(r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$", re.IGNORECASE)
+        if not line or not line_pattern.match(line.strip()):
             continue
         
         # Match lines like:
         # 7cf1.7e5f.c1ab     325   Dynamic   GPON0/1:18   1   162   HWTC07185a20
-        mac_match = re.match(
-            r'^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$',
-            line, re.IGNORECASE
-        )
-        if mac_match:
-            raw_mac, vlan, raw_port = mac_match.groups()
+        else:
+            raw_mac, vlan, raw_port = line_pattern.match(line.strip()).groups()
             
             # Convert MAC to xx:xx:xx:xx:xx:xx
+            clean_mac = raw_mac.replace('.', '').upper()
             mac = ':'.join([
-                raw_mac[0:2], raw_mac[2:4],
-                raw_mac[5:7], raw_mac[7:9],
-                raw_mac[10:12], raw_mac[12:14]
+                clean_mac[i:i+2] for i in range(0, 12, 2)
             ])
+
             
             # Extract port details like GPON0/1:18 → 1/18
             port = raw_port
@@ -153,8 +149,6 @@ def parse_mac_table_vsol(text):
                 'vlan': int(vlan),
                 'port': port
             })
-        else:
-            print(f"[!] Unparsed line {line_num + 1}: {line}")
     
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
