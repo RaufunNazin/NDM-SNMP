@@ -114,49 +114,61 @@ def parse_mac_table_cdata(text):
 
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
-    
+
     mac_entries = []
     lines = text.strip().splitlines()
+
+    mac_pattern = re.compile(r'^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})$', re.IGNORECASE)
+    block = []
     
     for line_num, line in enumerate(lines):
         line = line.strip()
         
-        # Skip empty or non-data lines
         if not line or line.startswith("---") or line.lower().startswith("mac address") or "Addresses of all" in line:
             continue
         
-        # Match lines like:
-        # 7cf1.7e5f.c1ab     325   Dynamic   GPON0/1:18   1   162   HWTC07185a20
-        mac_match = re.match(
-            r'^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\S+\s+(\S+)',
-            line, re.IGNORECASE
-        )
-        if mac_match:
-            raw_mac, vlan, raw_port = mac_match.groups()
-            
-            # Convert MAC to xx:xx:xx:xx:xx:xx
-            mac = ':'.join([
-                raw_mac[0:2], raw_mac[2:4],
-                raw_mac[5:7], raw_mac[7:9],
-                raw_mac[10:12], raw_mac[12:14]
-            ])
-            
-            # Extract port details like GPON0/1:18 → 1/18
-            port = raw_port
-            port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
-            if port_match:
-                port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
-            
-            mac_entries.append({
-                'mac': mac,
-                'vlan': int(vlan),
-                'port': port
-            })
+        if mac_pattern.match(line):
+            if block:
+                mac_entries.append(parse_vsol_block(block))
+                block = []
+            block.append(line)
         else:
-            print(f"[!] Unparsed line {line_num + 1}: {line}")
-    
-    print(f"[+] Parsed {len(mac_entries)} MAC entries.")
-    return mac_entries
+            block.append(line)
+
+    if block:
+        mac_entries.append(parse_vsol_block(block))
+
+    print(f"[+] Parsed {len([e for e in mac_entries if e is not None])} MAC entries.")
+    return [e for e in mac_entries if e is not None]
+
+
+def parse_vsol_block(block):
+    try:
+        raw_mac = block[0]
+        vlan = next((l for l in block if l.isdigit()), None)
+        port_line = next((l for l in block if "GPON" in l), None)
+        
+        # Convert MAC format
+        mac = ':'.join([
+            raw_mac[0:2], raw_mac[2:4],
+            raw_mac[5:7], raw_mac[7:9],
+            raw_mac[10:12], raw_mac[12:14]
+        ])
+        
+        # Extract port details like GPON0/1:18 → 1/18
+        port = port_line.strip() if port_line else "unknown"
+        port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', port)
+        if port_match:
+            port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
+        
+        return {
+            'mac': mac,
+            'vlan': int(vlan) if vlan else None,
+            'port': port
+        }
+    except Exception as e:
+        print(f"[!] Failed to parse block: {block} → {e}")
+        return None
 
 def get_parser_for_vendor(vendor):
     if vendor == CDATA_GPON:
