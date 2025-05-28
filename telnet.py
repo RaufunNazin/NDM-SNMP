@@ -154,6 +154,7 @@ def parse_mac_table_vsol(text):
                 continue
             else:
                 print(f"[-] Combined line starting at {i + 1} did not match pattern.")
+                print(line)
 
         i += 1
 
