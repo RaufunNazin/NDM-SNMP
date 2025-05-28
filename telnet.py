@@ -233,7 +233,9 @@ def main():
         # Show MAC table
         output = send_command_with_prompt_and_pagination(tn, commands["show_mac"], prompt, commands["pagination_text"])
         print("\n[+] Full output:\n")
+        print(output)
         print("----------------------------------------------------")
+        
         with open('mac_table_output.txt', 'w') as f:
             f.write(output)
             
