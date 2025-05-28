@@ -122,6 +122,7 @@ def parse_mac_table_vsol(text):
 
     for line in text_stream:
         line_num += 1
+        print(repr(line))
         line = line.strip()
         if not line:
             continue  # skip blank lines

@@ -8,15 +8,6 @@ def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
 
     mac_entries = []
-    line_pattern = re.compile(
-        r"([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
-        r"(\d+)\s+"                                    # VLAN
-        r"(\w+)\s+"                                    # Type (Dynamic)
-        r"(\S+)"                                       # Port
-        r"(?:\s+\S+)*",                                # Ignore trailing fields
-        re.IGNORECASE
-    )
-
     text_stream = io.StringIO(text)
     line_num = 0
 
@@ -24,31 +15,44 @@ def parse_mac_table_vsol(text):
         line_num += 1
         line = line.strip()
         if not line:
-            continue  # skip blank or whitespace-only lines
+            continue  # skip blank lines
 
         parts = line.split()
-        if len(parts) == 0:
-            continue  # extra guard, though usually not needed
+        # We expect at least 4 mandatory parts (MAC, VLAN, Type, Port)
+        if len(parts) < 4:
+            continue
 
+        # Check if the first part matches MAC format
         if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", parts[0], re.IGNORECASE):
-            match = line_pattern.match(line)
-            if match:
-                raw_mac, vlan, _type, raw_port = match.groups()
-                clean_mac = raw_mac.replace('.', '').upper()
-                mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
+            raw_mac = parts[0]
+            vlan = parts[1]
+            _type = parts[2]
+            raw_port = parts[3]
 
-                port = raw_port
-                port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
-                if port_match:
-                    port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
+            clean_mac = raw_mac.replace('.', '').upper()
+            mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
 
-                mac_entries.append({
-                    'mac': mac,
-                    'vlan': int(vlan),
-                    'port': port
-                })
-            else:
-                print(f"[-] Line {line_num} did not match pattern: '{line}'")
+            port = raw_port
+            port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
+            if port_match:
+                port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
+
+            # gem_index, gem_id, info are optional and can be present at positions 4,5,6+
+            gem_index = int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else None
+            gem_id = int(parts[5]) if len(parts) > 5 and parts[5].isdigit() else None
+            info = " ".join(parts[6:]) if len(parts) > 6 else None
+
+            mac_entries.append({
+                'mac': mac,
+                'vlan': int(vlan),
+                'type': _type,
+                'port': port,
+                'gem_index': gem_index,
+                'gem_id': gem_id,
+                'info': info,
+            })
+        else:
+            print(f"[-] Line {line_num} does not start with a MAC address: '{line}'")
 
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
