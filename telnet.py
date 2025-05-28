@@ -127,6 +127,8 @@ def parse_mac_table_vsol(text):
     )
 
     text_stream = io.StringIO(text)
+    print(f'[+] Processing text stream with {len(text_stream.readlines())} lines.')
+    print(f'lines: {text_stream.getvalue()}')
     line_num = 0
 
     for line in text_stream:
