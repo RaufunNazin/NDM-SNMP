@@ -121,8 +121,10 @@ def parse_mac_table_vsol(text):
         r"([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
         r"(\d+)\s+"                                    # VLAN
         r"(\w+)\s+"                                    # Type (Dynamic)
-        r"(\S+)"                                       # Port
-        r"(?:\s+\S+)*",                                # Ignore trailing fields
+        r"(\S+)\s+"                                   # Port
+        r"(\d+)?\s*"                                  # Gem_index (optional)
+        r"(\d+)?\s*"                                  # Gem_id (optional)
+        r"(\S*)",                                     # Info (optional)
         re.IGNORECASE
     )
 
@@ -172,7 +174,7 @@ def parse_mac_table_vsol(text):
         combined_line = re.sub(r'\s+', ' ', combined_line)
         match = line_pattern.match(combined_line)
         if match:
-            raw_mac, vlan, _type, raw_port = match.groups()
+            raw_mac, vlan, _type, raw_port, gem_index, gem_id, info = match.groups()
             clean_mac = raw_mac.replace('.', '').upper()
             mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
 
@@ -184,7 +186,7 @@ def parse_mac_table_vsol(text):
             mac_entries.append({
                 'mac': mac,
                 'vlan': int(vlan),
-                'port': port
+                'port': port,
             })
         else:
             print(f"[-] Could not parse combined line: '{combined_line}'")
