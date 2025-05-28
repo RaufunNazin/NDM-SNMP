@@ -18,6 +18,9 @@ db_user = os.getenv("DB_USER")
 db_pass = os.getenv("DB_PASS")
 db_sid = os.getenv("DB_SID")
 
+# Regex to remove ANSI escape and cursor codes
+ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
+
 # ----------------- VENDOR COMMAND CONFIG -----------------
 
 VENDOR_COMMANDS = {
@@ -58,6 +61,15 @@ def detect_prompt(tn):
 def flush_extra_output(tn):
     tn.write(b"\n" * 3)
     _ = tn.read_very_eager()
+    
+def clean_terminal_line(line):
+    # Remove ANSI codes
+    line = ansi_escape.sub('', line)
+    # Remove tabs
+    line = line.replace('\t', ' ')
+    # Collapse multiple spaces
+    line = re.sub(r'\s+', ' ', line)
+    return line.strip()
 
 def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
     print(f"[+] Sending command: {command}")
@@ -122,7 +134,7 @@ def parse_mac_table_vsol(text):
 
     for line in text_stream:
         line_num += 1
-        print(repr(line))
+        line = clean_terminal_line(line)
         line = line.strip()
         if not line:
             continue  # skip blank lines
