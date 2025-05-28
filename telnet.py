@@ -177,9 +177,6 @@ def parse_combined_line(line):
             'vlan': int(vlan),
             'port': port
         }
-    else:
-        print(f"[-] Could not parse combined line: '{line}'")
-        return None
 
 
 
