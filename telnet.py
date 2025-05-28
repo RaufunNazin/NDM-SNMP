@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from utils import insert_into_db_olt_customer_mac
 from enums import CDATA_EPON, CDATA_GPON, VSOL_EPON, VSOL_GPON
+import io
 
 
 # Load environment variables from .env file
@@ -114,39 +115,50 @@ def parse_mac_table_cdata(text):
 
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
-    
-    mac_entries = []
-    lines = text.strip().splitlines()
-    
-    for line_num, line in enumerate(lines):
-        line = line.strip()
-        
-        # Skip empty or non-data lines
-        line_pattern = re.compile(r"^([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+(\d+)\s+\w+\s+(\S+)\s+\d+\s+\d+\s+\w+$", re.IGNORECASE)
-        if line_pattern.match(line.strip()):
-            raw_mac, vlan, raw_port = line_pattern.match(line.strip()).groups()
-            
-            # Convert MAC to xx:xx:xx:xx:xx:xx
-            clean_mac = raw_mac.replace('.', '').upper()
-            mac = ':'.join([
-                clean_mac[i:i+2] for i in range(0, 12, 2)
-            ])
 
-            
-            # Extract port details like GPON0/1:18 → 1/18
-            port = raw_port
-            port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
-            if port_match:
-                port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
-            
-            mac_entries.append({
-                'mac': mac,
-                'vlan': int(vlan),
-                'port': port
-            })
-        else:
-            print(f"[-] Skipping line {line_num + 1}: '{line}' - does not match expected format.")
-    
+    mac_entries = []
+    line_pattern = re.compile(
+        r"([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})\s+"  # MAC
+        r"(\d+)\s+"                                    # VLAN
+        r"(\w+)\s+"                                    # Type (Dynamic)
+        r"(\S+)"                                       # Port
+        r"(?:\s+\S+)*",                                # Ignore trailing fields
+        re.IGNORECASE
+    )
+
+    text_stream = io.StringIO(text)
+    line_num = 0
+
+    for line in text_stream:
+        line_num += 1
+        line = line.strip()
+        if not line:
+            continue  # skip blank or whitespace-only lines
+
+        parts = line.split()
+        if len(parts) == 0:
+            continue  # extra guard, though usually not needed
+
+        if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", parts[0], re.IGNORECASE):
+            match = line_pattern.match(line)
+            if match:
+                raw_mac, vlan, _type, raw_port = match.groups()
+                clean_mac = raw_mac.replace('.', '').upper()
+                mac = ':'.join([clean_mac[k:k+2] for k in range(0, 12, 2)])
+
+                port = raw_port
+                port_match = re.match(r'\w+(\d+)/(\d+):(\d+)', raw_port)
+                if port_match:
+                    port = f"{port_match.group(1)}/{port_match.group(2)}/{port_match.group(3)}"
+
+                mac_entries.append({
+                    'mac': mac,
+                    'vlan': int(vlan),
+                    'port': port
+                })
+            else:
+                print(f"[-] Line {line_num} did not match pattern: '{line}'")
+
     print(f"[+] Parsed {len(mac_entries)} MAC entries.")
     return mac_entries
 
