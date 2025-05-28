@@ -239,12 +239,15 @@ def main():
         # Show MAC table
         output = send_command_with_prompt_and_pagination(tn, commands["show_mac"], prompt, commands["pagination_text"])
         print("\n[+] Full output:\n")
-        print(output)
-        text_output = '\n'.join(output.splitlines())
         print("----------------------------------------------------")
+        with open('mac_table_output.txt', 'w') as f:
+            f.write(output)
+            
+        with open('mac_table_output.txt', 'r') as f:
+            output_text = f.read()
 
         # Parse based on vendor
-        parsed_output = parse_function(text_output)
+        parsed_output = parse_function(output_text)
         for entry in parsed_output:
             print(entry)
 
