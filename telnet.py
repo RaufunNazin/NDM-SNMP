@@ -114,6 +114,8 @@ def parse_mac_table_cdata(text):
 
 def parse_mac_table_vsol(text):
     print("[+] Parsing MAC table for VSOL vendor...")
+    with open("vsol_mac_table.txt", "w") as f:
+        f.write(text)
 
     mac_entries = []
     lines = text.strip().splitlines()
@@ -129,14 +131,14 @@ def parse_mac_table_vsol(text):
         
         if mac_pattern.match(line):
             if block:
-                mac_entries.append(parse_vsol_block(block))
+                # mac_entries.append(parse_vsol_block(block))
                 block = []
             block.append(line)
         else:
             block.append(line)
 
-    if block:
-        mac_entries.append(parse_vsol_block(block))
+    # if block:
+    #     mac_entries.append(parse_vsol_block(block))
 
     print(f"[+] Parsed {len([e for e in mac_entries if e is not None])} MAC entries.")
     return [e for e in mac_entries if e is not None]
