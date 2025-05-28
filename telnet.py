@@ -129,11 +129,17 @@ def parse_mac_table_vsol(text):
     text_stream = io.StringIO(text)
     print(f'[+] Processing text stream with {len(text_stream.readlines())} lines.')
     line_num = 0
+    record = []
     for line in text_stream:
-        line_num += 1
-        print(f'line: {line_num}{line}')
+        clean_line = line.strip()
+        if clean_line:  # skip empty lines
+            record.append(clean_line)
+            if len(record) == 6:
+                mac, vlan, typ, port, gem_idx, gem_id_info = record
+                print(f'{mac} | {vlan} | {typ} | {port} | {gem_idx} | {gem_id_info}')
+                record = []
 
-    for line in text_stream:
+    for line in record:
         line_num += 1
         line = line.strip()
         if not line:
