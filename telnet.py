@@ -123,7 +123,7 @@ def parse_mac_table_vsol(text):
         line = lines[i].strip()
 
         # Check if line has MAC pattern (basic)
-        if re.match(r"^[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}$", line, re.IGNORECASE):
+        if re.match(r"^\s*[0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4}\s*$", line, re.IGNORECASE):
             combined_line = line
             # Combine next 6 lines if available
             for j in range(1, 7):
