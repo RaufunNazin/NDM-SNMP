@@ -1,0 +1,6 @@
+1. Store the full index string for power recovery (cdata-epon and gpon) as suffix
+2. Store the index for all get operations for vsol-gpon
+3. test the snmpget for vsol gpon
+4. create map for mac retrieval process (eg. scraping for cdata-epon, telnet for cdata-gpon and vsol-gpon)
+5. test on other olt models
+6. optional: reduce mib file size for faster load

@@ -5,7 +5,7 @@ import argparse
 import os
 from dotenv import load_dotenv
 from utils import insert_into_db_olt_customer_mac
-from enums import CDATA_EPON, CDATA_GPON, VSOL_EPON, VSOL_GPON
+from enums import CDATA_GPON, VSOL_EPON, VSOL_GPON
 import io
 
 
@@ -31,15 +31,15 @@ VENDOR_COMMANDS = {
         "pagination_text": "--More ( Press 'Q' to quit )--"
     },
     VSOL_EPON: {
-        "enable": "enable",  # Example; replace as needed
-        "config": "config",  # Example; replace as needed
-        "show_mac": "show mac-address all",  # Example; replace as needed
+        "enable": "enable",
+        "config": "config",
+        "show_mac": "show mac-address all",
         "pagination_text": "--More--"
     },
     VSOL_GPON: {
-        "enable": "enable",  # Example; replace as needed
-        "config": "configure terminal",  # Example; replace as needed
-        "show_mac": "show mac address-table pon",  # Example; replace as needed
+        "enable": "enable",
+        "config": "configure terminal",
+        "show_mac": "show mac address-table pon",
         "pagination_text": "--More--"
     }
 }
@@ -95,7 +95,7 @@ def send_command_with_prompt_and_pagination(tn, command, prompt, more_prompt):
 
 # ----------------- PARSING PLACEHOLDER FUNCTIONS -----------------
 
-def parse_mac_table_cdata(text):
+def parse_cdata_gpon(text):
     mac_entries = []
 
     # Skip lines before data starts
@@ -125,7 +125,7 @@ def parse_mac_table_cdata(text):
 
     return mac_entries
 
-def parse_mac_table_vsol(text):
+def parse_vsol_gpon(text):
     print("[+] Parsing MAC table for VSOL vendor...")
 
     lines = clean_terminal_text(text)
@@ -182,9 +182,9 @@ def parse_combined_line(line):
 
 def get_parser_for_vendor(vendor):
     if vendor == CDATA_GPON:
-        return parse_mac_table_cdata
-    elif vendor in [VSOL_EPON, VSOL_GPON]:
-        return parse_mac_table_vsol
+        return parse_cdata_gpon
+    elif vendor == VSOL_GPON:
+        return parse_vsol_gpon
     else:
         raise ValueError(f"Unsupported vendor: {vendor}")
 
