@@ -1,3 +1,4 @@
+from turtle import up
 from pysnmp.smi import builder, view
 import re
 from datetime import datetime, timedelta
@@ -184,8 +185,8 @@ def convert_power_to_dbm(power_value):
     # The value -2268 suggests units of 0.01 dBm, hence division by 100.
     return float(power_value) / 100.0  # Divide by 100 for dBm value
 
-# Function to parse SNMP output and extract ONU data
-def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal 'data' variables
+# Function to parse SNMP output and extract CDATA ONU data
+def parse_cdata_onu_data(data_str): # Renamed argument to avoid conflict with internal 'data' variables
     onu_data = {} # This dictionary will use string keys for ONU indices
 
     # Helper to initialize ONU entry if it doesn't exist and set IFINDEX
@@ -196,25 +197,25 @@ def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal
             onu_data[index_key_str]['IFINDEX'] = int(index_key_str)
 
     # MAC Address
-    mac_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuMacAddress\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
+    mac_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuMacAddress\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
     for index_s, mac in mac_matches:
         ensure_onu_entry(index_s)
         onu_data[index_s]['MAC'] = format_mac(mac)
         
     # Serial Number
-    sn_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuSn\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
+    sn_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuSn\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
     for index_s, sn in sn_matches:
         ensure_onu_entry(index_s)
         onu_data[index_s]['SLNO'] = format_mac(sn)
     
     # Operation Status - Made INTEGER32 optional in regex
-    status_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuOperationStatus\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
+    status_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuOperationStatus\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
     for index_s, status_val in status_matches:
         ensure_onu_entry(index_s)
         onu_data[index_s]['STATUS'] = int(status_val)
     
     # Admin Status - Made INTEGER32 optional in regex
-    admin_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuAdminStatus\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
+    admin_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuAdminStatus\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
     for index_s, status_val in admin_matches:
         ensure_onu_entry(index_s)
         # Assuming '2' means disabled, and you want to map it to status '3'
@@ -222,14 +223,14 @@ def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal
             onu_data[index_s]['STATUS'] = 3 
     
     # Distance - Made INTEGER32 optional in regex
-    distance_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuTestDistance\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
+    distance_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuTestDistance\.(\d+) = INTEGER(?:32)?: (\d+)', data_str)
     for index_s, distance in distance_matches:
         ensure_onu_entry(index_s)
         onu_data[index_s]['DISTANCE'] = int(distance)
     
     # Time Since Last Register (for UP_SINCE calculation)
     # Sample output shows "Counter32: 5954", assuming value is in seconds.
-    time_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuTimeSinceLastRegister\.(\d+) = Counter32: (\d+)', data_str)
+    time_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuTimeSinceLastRegister\.(\d+) = Counter32: (\d+)', data_str)
     for index_s, seconds_str in time_matches:
         ensure_onu_entry(index_s)
         current_time = datetime.now()
@@ -237,7 +238,7 @@ def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal
         onu_data[index_s]['UP_SINCE'] = up_since
     
     # Vendor ID
-    vendor_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuVendorId\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
+    vendor_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuVendorId\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
     for index_s, vendor_hex in vendor_matches:
         ensure_onu_entry(index_s)
         # Convert hex to ASCII, filtering only printable characters
@@ -245,7 +246,7 @@ def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal
         onu_data[index_s]['ONU_VENDOR'] = vendor.strip()
     
     # Model ID - Made regex for string non-greedy and improved hex decoding
-    model_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuModelId\.(\d+) = (?:STRING: "([^"]*)"|Hex-STRING: ([0-9A-F ]+))', data_str)
+    model_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuModelId\.(\d+) = (?:STRING: "([^"]*)"|Hex-STRING: ([0-9A-F ]+))', data_str)
     for match in model_matches:
         index_s = match[0]
         ensure_onu_entry(index_s)
@@ -266,7 +267,7 @@ def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal
         onu_data[index_s]['ONU_MODEL'] = model
     
     # Received Optical Power - Made INTEGER32 optional in regex
-    power_matches = re.findall(r'NSCRTV-FTTX-EPON-MIB::onuReceivedOpticalPower\.(\d+)\.(\d+)\.(\d+) = INTEGER(?:32)?: (-?\d+)', data_str)
+    power_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuReceivedOpticalPower\.(\d+)\.(\d+)\.(\d+) = INTEGER(?:32)?: (-?\d+)', data_str)
     for index_s, port1, port2, power_val_str in power_matches: # index_s is the string ONU index
         ensure_onu_entry(index_s) # Use the string index as the key
         
@@ -274,6 +275,86 @@ def parse_onu_data(data_str): # Renamed argument to avoid conflict with internal
         onu_num_val = int(index_s) & 0xFF 
         onu_data[index_s]['POWER'] = convert_power_to_dbm(power_val_str)
         onu_data[index_s]['IFINDEX2'] = f'epon0/{port1}/{port2}/{onu_num_val}'
+    
+    return onu_data
+
+# Function to parse SNMP output and extract VSOL ONU data
+def parse_vsol_onu_data(data_str): # Renamed argument to avoid conflict with internal 'data' variables
+    onu_data = {} # This dictionary will use string keys for ONU indices
+
+    # Helper to initialize ONU entry if it doesn't exist and set IFINDEX
+    def ensure_onu_entry(index_key_str):
+        if index_key_str not in onu_data:
+            onu_data[index_key_str] = {}
+            # Populate IFINDEX using the string key, converted to an integer
+            onu_data[index_key_str]['IFINDEX'] = int(index_key_str)
+
+    # MAC Address
+    mac_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuMacAddress\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
+    for name, portandonu, mac in mac_matches:
+        ensure_onu_entry(portandonu)
+        onu_data[portandonu]['MAC'] = format_mac(mac)
+        
+    # Serial Number
+    sn_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoSn)\.((?:\d+\.)*\d+) = (?:STRING|Hex-STRING): "?([^"]+)"?', data_str)
+    for name, portandonu, sn in sn_matches:
+        ensure_onu_entry(portandonu)
+        onu_data[portandonu]['SLNO'] = format_mac(sn)
+    
+    # Operation Status - Made INTEGER32 optional in regex
+    status_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoOpSta)\.((?:\d+\.)*\d+) = (?:INTEGER): "?([^"]+)"?', data_str)
+    for name, portandonu, status_val in status_matches:
+        ensure_onu_entry(portandonu)
+        onu_data[portandonu]['STATUS'] = int(status_val)
+    
+    # Admin Status - Made INTEGER32 optional in regex
+    admin_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuStaInfoAdminSta)\.((?:\d+\.)*\d+) = (?:INTEGER): "?([^"]+)"?', data_str)
+    for name, portandonu, status_val in admin_matches:
+        ensure_onu_entry(portandonu)
+        # Assuming '2' means disabled, and you want to map it to status '3'
+        if str(status_val) == '2': 
+            onu_data[portandonu]['STATUS'] = 3 
+    
+    # Distance - Made INTEGER32 optional in regex
+    distance_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(DISTANCE)\.((?:\d+\.)*\d+) = (?:INTEGER): "?([^"]+)"?', data_str)
+    for name, portandonu, distance in distance_matches:
+        ensure_onu_entry(portandonu)
+        onu_data[portandonu]['DISTANCE'] = int(distance)
+    
+    # Time Since Last Register (for UP_SINCE calculation)
+    # Sample output shows "Counter32: 5954", assuming value is in seconds.
+    time_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoSysUpTime)\.((?:\d+\.)*\d+) = (?:STRING): "?([^"]+)"?', data_str)
+    for name, portandonu, uptime in time_matches:
+        ensure_onu_entry(portandonu)
+        current_time = datetime.now()
+        if uptime == "N/A":
+            up_since = None
+        else:
+            seconds_str = uptime.split(' ')[0]  # Extract the first part before any text
+            up_since = current_time - timedelta(seconds=int(seconds_str))
+        onu_data[portandonu]['UP_SINCE'] = up_since
+    
+    # Vendor ID
+    vendor_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoVendorId)\.((?:\d+\.)*\d+) = (?:STRING): "?([^"]+)"?', data_str)
+    for name, portandonu, vendor in vendor_matches:
+        ensure_onu_entry(portandonu)
+        onu_data[portandonu]['ONU_VENDOR'] = vendor.strip()
+    
+    # Model ID - Made regex for string non-greedy and improved hex decoding
+    model_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuModel)\.((?:\d+\.)*\d+) = (?:STRING): "?([^"]+)"?', data_str)
+    for name, portandonu, model in model_matches:
+        ensure_onu_entry(portandonu)
+        onu_data[portandonu]['ONU_MODEL'] = model
+    
+    # Received Optical Power - Made INTEGER32 optional in regex
+    power_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuOpticalInfoRxPwr)\.((?:\d+\.)*\d+) = (?:STRING): "?([^"]+)"?', data_str)
+    for name, portandonu, power_val_str in power_matches: # portandonu is the string ONU index
+        ensure_onu_entry(portandonu) # Use the string index as the key
+        
+        # For onu_num calculation, int(portandonu) is fine
+        onu_num_val = int(portandonu) & 0xFF 
+        onu_data[portandonu]['POWER'] = convert_power_to_dbm(power_val_str)
+        onu_data[portandonu]['IFINDEX2'] = f'{portandonu}/{onu_num_val}'
     
     return onu_data
 

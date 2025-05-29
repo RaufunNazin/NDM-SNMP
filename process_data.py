@@ -189,7 +189,7 @@ def process_vsol_gpon(snmp_output_lines):
             oid_key = oid_key_full_name
             if "::" in oid_key_full_name:  # Extract the object name part if MIB prefix exists
                 oid_key = oid_key_full_name.split("::", 1)[1]
-            device_id_str = f'{oid_components[1]}/{oid_components[2]}'  # IndexID
+            device_id_str = '/'.join(oid_components[1:])
             # Extract value type indicator (e.g., "Hex-STRING") and raw value string
             if ": " in value_full_str:
                 value_parts = value_full_str.split(": ", 1)

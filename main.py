@@ -3,7 +3,8 @@ from pysnmp.hlapi.v3arch.asyncio import *
 import os
 from dotenv import load_dotenv
 import argparse
-from utils import snmp_walk, parse_onu_data, insert_into_db
+from enums import CDATA_EPON, CDATA_GPON, VSOL_GPON
+from utils import snmp_walk, parse_cdata_onu_data, parse_vsol_onu_data, insert_into_db
 import cx_Oracle
 import json
 
@@ -32,11 +33,27 @@ if not snmp_version in [0, 1]:
 # Initialize Oracle client
 cx_Oracle.init_oracle_client(lib_dir=instant_client)
 
+def get_process_function(brand):
+    if brand in [CDATA_EPON, CDATA_GPON]:
+        return parse_cdata_onu_data
+    elif brand == VSOL_GPON:
+        return parse_vsol_onu_data
+    else:
+        raise ValueError(f"Unsupported brand: {brand}")
+
 # Run and display
 async def main():
+    supported_brands = {
+        "CDATA-EPON": CDATA_EPON,
+        "CDATA-GPON": CDATA_GPON,
+        "VSOL-GPON": VSOL_GPON,
+    }
+    
     parser = argparse.ArgumentParser(description='Process ONU data from SNMP output and insert into database')
     parser.add_argument('-d', '--dry-run', action='store_true', help='Parse data but do not insert into database')
     parser.add_argument("-debug", type=bool, default=False, help="If True, enable debug mode for detailed logging")
+    parser.add_argument("-bd", required=True, choices=list(supported_brands.keys()),
+                        help="Brand, e.g., CDATA-EPON or CDATA-GPON")
     args = parser.parse_args()
     print("Running SNMP walk...")
     print(f"Target IP: {target_ip}")
@@ -49,6 +66,8 @@ async def main():
     
     args = parser.parse_args()
     debug_mode = args.debug
+    brand = args.bd
+    
     
     snmp_output = await snmp_walk(target_ip, community_string, oid_to_walk, port, snmp_version, snmp_timeout, snmp_retries, debug_mode)
     
@@ -63,7 +82,8 @@ async def main():
     print(snmp_output)
     
     # Parse the SNMP output
-    parsed_snmp_output = parse_onu_data(snmp_data_str)
+    parse_function = get_process_function(brand)
+    parsed_snmp_output = parse_function(snmp_data_str)
     parsed_output_file = 'parsed_snmp_output.txt'
     with open(parsed_output_file, 'w') as f:
         f.write(json.dumps(parsed_snmp_output, indent=2, default=str))

@@ -41,6 +41,7 @@ async def main():
     supported_brands = {
         "CDATA-EPON": CDATA_EPON,
         "CDATA-GPON": CDATA_GPON,
+        "VSOL-GPON": VSOL_GPON,
     }
 
     parser = argparse.ArgumentParser(description="SNMP OLT Information Retriever")
