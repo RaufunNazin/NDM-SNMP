@@ -4,3 +4,7 @@
 4. create map for mac retrieval process (eg. scraping for cdata-epon, telnet for cdata-gpon and vsol-gpon)
 5. test on other olt models
 6. optional: reduce mib file size for faster load
+7. separate functions for status parsing
+8. separate function for parsing onu data for cdata and vsol
+9. add error handling for snmpget failures
+10. change uptime from timesincelastregister to sysuptime (cdata)

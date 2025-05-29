@@ -1,8 +1,8 @@
 import asyncio
-from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA_EPON, CDATA_GPON
+from enums import MAC, OPERATION_STATUS, ADMIN_STATUS, DISTANCE, UP_SINCE, VENDOR, MODEL, SERIAL_NO, POWER, CDATA_EPON, CDATA_GPON, VSOL_GPON
 import argparse
 from helper import get_olt_information
-from process_data import process_cdata
+from process_data import process_cdata, process_vsol_gpon
 
 def process_snmp_data(snmp_output_lines, brand, olt_type):
     """
@@ -18,6 +18,8 @@ def process_snmp_data(snmp_output_lines, brand, olt_type):
     """
     if brand == CDATA_EPON or brand == CDATA_GPON:
         return process_cdata(snmp_output_lines, olt_type)
+    elif brand == VSOL_GPON:
+        return process_vsol_gpon(snmp_output_lines)
     else:
         print(f"Unsupported brand: {brand}")
         return []

@@ -1,3 +1,5 @@
+from ast import parse
+from curses import raw
 from utils import format_mac, convert_power_to_dbm
 from index_decoder import decode_cdata_epon, decode_cdata_gpon
 from enums import HEX_STRING, GAUGE, INTEGER, STRING, COUNTER, NULL, SLOT_ID, CARD_ID, PON_ID, ONU_ID, EPON_LOWER, GPON_LOWER
@@ -90,7 +92,7 @@ def process_cdata(snmp_output_lines, olt_type):
             card_id = decoded_indices[CARD_ID]
             pon_id = decoded_indices[PON_ID]
             onu_id = decoded_indices[ONU_ID]
-            frame_id = f"{olt_type}{frame_id}/{slot_id}/{pon_id}/{onu_id}->{device_id_str}:{card_id}"
+            onu_string = f"{olt_type}{frame_id}/{slot_id}/{pon_id}/{onu_id}->{device_id_str}:{card_id}"
 
             # Parse the value based on OID key and value type
             parsed_value = None
@@ -132,7 +134,115 @@ def process_cdata(snmp_output_lines, olt_type):
             # Store in the map
             if oid_key not in processed_data_map:
                 processed_data_map[oid_key] = {}
-            processed_data_map[oid_key][frame_id] = parsed_value
+            processed_data_map[oid_key][onu_string] = parsed_value
+
+        except ValueError as ve: # Catch potential int conversion errors for device_id_str
+            print(f"Warning: ValueError processing line '{line}': {ve}")
+        except Exception as e: # Catch any other unexpected errors during line processing
+            print(f"Warning: Generic error processing line '{line}': {e}")
+
+    # Convert map to the required list of dictionaries format
+    result_array = []
+    for key, value_map in processed_data_map.items():
+        result_array.append({key: value_map})
+        
+    return result_array
+
+def process_vsol_gpon(snmp_output_lines):
+    """
+    Processes SNMP output lines to extract and structure data for VSOL OLTs.
+
+    Args:
+        snmp_output_lines (list): A list of strings, where each string is an SNMP output line.
+                                  Example format: "MIB-NAME::objectName.index... = ValueType: ValueString"
+
+    Returns:
+        list: An array of objects (list of dictionaries).
+              Example: [{ "onuMacAddress": { "frameid1": "mac_val1", ... } },
+                        { "onuReceivedOpticalPower": { "frameid2": power_val2, ... } }]
+    """
+    # This dictionary will store data like:
+    # {
+    #   "onuMacAddress": {"0/2/1/20": "A2:4F:02:18:E5:80"},
+    #   "onuReceivedOpticalPower": {"0/2/3/16": -12.80},
+    #   "onuOperationStatus": {"0/2/1/20": 1}
+    # }
+    processed_data_map = {}
+
+    for line in snmp_output_lines:
+        try:
+            # Split OID part from value part
+            parts = line.split(" = ", 1)
+            if len(parts) != 2:
+                print(f"Warning: Skipping malformed line (no ' = ' separator): {line}")
+                continue
+            
+            oid_full_str, value_full_str = parts
+
+            # Extract OID key (e.g., "onuMacAddress") and the primary device_id string
+            oid_components = oid_full_str.split('.')
+            if not oid_components:
+                print(f"Warning: Skipping line with invalid OID format (empty components after split by '.'): {line}")
+                continue
+
+            oid_key_full_name = oid_components[0]
+            oid_key = oid_key_full_name
+            if "::" in oid_key_full_name:  # Extract the object name part if MIB prefix exists
+                oid_key = oid_key_full_name.split("::", 1)[1]
+            device_id_str = f'{oid_components[1]}/{oid_components[2]}'  # IndexID
+            # Extract value type indicator (e.g., "Hex-STRING") and raw value string
+            if ": " in value_full_str:
+                value_parts = value_full_str.split(": ", 1)
+                if len(value_parts) != 2:
+                    print(f"Warning: Skipping line with invalid value format (no ': ' separator): {line}")
+                    continue
+                
+                value_type_indicator = value_parts[0]  # e.g., "Hex-STRING", INTEGER, "Counter32"
+                raw_value_str = value_parts[1]         # e.g., "A2 4F 02 18 E5 80", "-1280", "12345"
+            elif value_full_str == "":
+                value_type_indicator = NULL
+                raw_value_str = ""
+            else:
+                raw_value_str = value_full_str
+                
+            parsed_value = None
+            if "gOnuOpticalInfoRxPwr" in oid_key:  # Specific handling for optical power
+                try:
+                    parsed_value = convert_power_to_dbm(int(raw_value_str))
+                except ValueError:
+                    print(f"Warning: Could not parse power value '{raw_value_str}' as int for line: {line}")
+                    parsed_value = raw_value_str  # Fallback
+            elif "gOnuDetailInfoSysUpTime" in oid_key:  # Specific handling for time since last register
+                try:
+                    current_time = datetime.now()
+                    if raw_value_str == "N/A":
+                        parsed_value = None
+                    else:
+                        seconds = int(raw_value_str.split(' ')[0])
+                    parsed_value = current_time - timedelta(seconds=int(seconds))
+                except ValueError:
+                    print(f"Warning: Could not parse time value '{raw_value_str}' as int for line: {line}")
+                    parsed_value = raw_value_str
+            elif value_type_indicator == HEX_STRING:
+                parsed_value = format_mac(raw_value_str)
+            elif value_type_indicator.startswith(INTEGER) or \
+                 value_type_indicator.startswith(GAUGE) or \
+                 value_type_indicator.startswith(COUNTER):
+                try:
+                    parsed_value = int(raw_value_str)
+                except ValueError:
+                    parsed_value = raw_value_str  # Fallback if not a simple int
+            elif value_type_indicator == STRING:
+                parsed_value = raw_value_str.strip('"')
+            elif value_type_indicator == NULL:
+                parsed_value = None
+            else:
+                parsed_value = raw_value_str  # Default for other types
+                
+            # Store in the map
+            if oid_key not in processed_data_map:
+                processed_data_map[oid_key] = {}
+            processed_data_map[oid_key][device_id_str] = parsed_value
 
         except ValueError as ve: # Catch potential int conversion errors for device_id_str
             print(f"Warning: ValueError processing line '{line}': {ve}")
