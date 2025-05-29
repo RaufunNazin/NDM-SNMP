@@ -8,7 +8,7 @@
 # Notes
 # -----
 # ASN.1 source file://mibs/V1600D
-# Produced by pysmi-1.6.1 at Wed May 28 17:56:09 2025
+# Produced by pysmi-1.6.1 at Thu May 29 10:41:02 2025
 # On host user-HP platform Linux version 6.11.0-26-generic by user user
 # Using Python version 3.12.3 (main, Feb  4 2025, 14:48:35) [GCC 13.3.0]
 
@@ -536,7 +536,7 @@ class _UpLinkPortIsolate_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("no-isolate", 0),
+        *(("no_isolate", 0),
           ("isolate", 1))
     )
 
@@ -1755,7 +1755,7 @@ class _PonPortIsolate_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("no-isolate", 0),
+        *(("no_isolate", 0),
           ("isolate", 1))
     )
 
@@ -6401,7 +6401,7 @@ class _Tagstrip_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("no-tagstrip", 0),
+        *(("no_tagstrip", 0),
           ("tagstrip", 1))
     )
 
@@ -14539,8 +14539,8 @@ class _AutoSaveType_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("timeout", 0),
-          ("fix-time", 1),
-          ("week-day", 2))
+          ("fix_time", 1),
+          ("week_day", 2))
     )
 
 
@@ -14930,8 +14930,8 @@ class _AutoSaveTypeS_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("timeout", 0),
-          ("fix-time", 1),
-          ("week-day", 2))
+          ("fix_time", 1),
+          ("week_day", 2))
     )
 
 
@@ -15258,8 +15258,8 @@ class _AutoBackupType_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("timeout", 0),
-          ("fix-time", 1),
-          ("week-day", 2))
+          ("fix_time", 1),
+          ("week_day", 2))
     )
 
 
@@ -15658,8 +15658,8 @@ class _AutoBackupTypeS_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("timeout", 0),
-          ("fix-time", 1),
-          ("week-day", 2))
+          ("fix_time", 1),
+          ("week_day", 2))
     )
 
 
@@ -18557,9 +18557,9 @@ class _DataTrapClass_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("clear-alarm", 0),
-          ("raised-alarm", 1),
-          ("no-clear-alarm", 2))
+        *(("clear_alarm", 0),
+          ("raised_alarm", 1),
+          ("no_clear_alarm", 2))
     )
 
 
@@ -28351,6 +28351,741 @@ tacplusKey = _TacplusKey_Object(
 tacplusKey.setMaxAccess("read-only")
 if mibBuilder.loadTexts:
     tacplusKey.setStatus("current")
+_V1600Radius_ObjectIdentity = ObjectIdentity
+v1600Radius = _V1600Radius_ObjectIdentity(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26)
+)
+_RadiusCfg_ObjectIdentity = ObjectIdentity
+radiusCfg = _RadiusCfg_ObjectIdentity(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1)
+)
+
+
+class _RadAAAEnable_Type(Integer32):
+    """Custom type radAAAEnable based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadAAAEnable_Type.__name__ = "Integer32"
+_RadAAAEnable_Object = MibScalar
+radAAAEnable = _RadAAAEnable_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 1),
+    _RadAAAEnable_Type()
+)
+radAAAEnable.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radAAAEnable.setStatus("current")
+
+
+class _RadAuthen_Type(Integer32):
+    """Custom type radAuthen based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadAuthen_Type.__name__ = "Integer32"
+_RadAuthen_Object = MibScalar
+radAuthen = _RadAuthen_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 2),
+    _RadAuthen_Type()
+)
+radAuthen.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radAuthen.setStatus("current")
+
+
+class _RadAuthenLocal_Type(Integer32):
+    """Custom type radAuthenLocal based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadAuthenLocal_Type.__name__ = "Integer32"
+_RadAuthenLocal_Object = MibScalar
+radAuthenLocal = _RadAuthenLocal_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 3),
+    _RadAuthenLocal_Type()
+)
+radAuthenLocal.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radAuthenLocal.setStatus("current")
+
+
+class _RadAuthenEnable_Type(Integer32):
+    """Custom type radAuthenEnable based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadAuthenEnable_Type.__name__ = "Integer32"
+_RadAuthenEnable_Object = MibScalar
+radAuthenEnable = _RadAuthenEnable_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 4),
+    _RadAuthenEnable_Type()
+)
+radAuthenEnable.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radAuthenEnable.setStatus("current")
+
+
+class _RadAuthenEnableLocal_Type(Integer32):
+    """Custom type radAuthenEnableLocal based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadAuthenEnableLocal_Type.__name__ = "Integer32"
+_RadAuthenEnableLocal_Object = MibScalar
+radAuthenEnableLocal = _RadAuthenEnableLocal_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 5),
+    _RadAuthenEnableLocal_Type()
+)
+radAuthenEnableLocal.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radAuthenEnableLocal.setStatus("current")
+
+
+class _RadAcctExec_Type(Integer32):
+    """Custom type radAcctExec based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadAcctExec_Type.__name__ = "Integer32"
+_RadAcctExec_Object = MibScalar
+radAcctExec = _RadAcctExec_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 6),
+    _RadAcctExec_Type()
+)
+radAcctExec.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radAcctExec.setStatus("current")
+
+
+class _EnableConsoleRad_Type(Integer32):
+    """Custom type enableConsoleRad based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_EnableConsoleRad_Type.__name__ = "Integer32"
+_EnableConsoleRad_Object = MibScalar
+enableConsoleRad = _EnableConsoleRad_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 7),
+    _EnableConsoleRad_Type()
+)
+enableConsoleRad.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    enableConsoleRad.setStatus("current")
+
+
+class _EnableWebRad_Type(Integer32):
+    """Custom type enableWebRad based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_EnableWebRad_Type.__name__ = "Integer32"
+_EnableWebRad_Object = MibScalar
+enableWebRad = _EnableWebRad_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 8),
+    _EnableWebRad_Type()
+)
+enableWebRad.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    enableWebRad.setStatus("current")
+
+
+class _RadDot1xAuthen_Type(Integer32):
+    """Custom type radDot1xAuthen based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadDot1xAuthen_Type.__name__ = "Integer32"
+_RadDot1xAuthen_Object = MibScalar
+radDot1xAuthen = _RadDot1xAuthen_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 9),
+    _RadDot1xAuthen_Type()
+)
+radDot1xAuthen.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radDot1xAuthen.setStatus("current")
+
+
+class _RadDot1xAuthenLocal_Type(Integer32):
+    """Custom type radDot1xAuthenLocal based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadDot1xAuthenLocal_Type.__name__ = "Integer32"
+_RadDot1xAuthenLocal_Object = MibScalar
+radDot1xAuthenLocal = _RadDot1xAuthenLocal_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 10),
+    _RadDot1xAuthenLocal_Type()
+)
+radDot1xAuthenLocal.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radDot1xAuthenLocal.setStatus("current")
+
+
+class _RadDot1xAuthor_Type(Integer32):
+    """Custom type radDot1xAuthor based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadDot1xAuthor_Type.__name__ = "Integer32"
+_RadDot1xAuthor_Object = MibScalar
+radDot1xAuthor = _RadDot1xAuthor_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 11),
+    _RadDot1xAuthor_Type()
+)
+radDot1xAuthor.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radDot1xAuthor.setStatus("current")
+
+
+class _RadDot1xAcct_Type(Integer32):
+    """Custom type radDot1xAcct based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadDot1xAcct_Type.__name__ = "Integer32"
+_RadDot1xAcct_Object = MibScalar
+radDot1xAcct = _RadDot1xAcct_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 1, 12),
+    _RadDot1xAcct_Type()
+)
+radDot1xAcct.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radDot1xAcct.setStatus("current")
+_RadiusCfgTable_Object = MibTable
+radiusCfgTable = _RadiusCfgTable_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2)
+)
+if mibBuilder.loadTexts:
+    radiusCfgTable.setStatus("current")
+_RadiusCfgEntry_Object = MibTableRow
+radiusCfgEntry = _RadiusCfgEntry_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1)
+)
+radiusCfgEntry.setIndexNames(
+    (0, "V1600D", "radiusAAA"),
+)
+if mibBuilder.loadTexts:
+    radiusCfgEntry.setStatus("current")
+
+
+class _RadiusAAA_Type(Integer32):
+    """Custom type radiusAAA based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusAAA_Type.__name__ = "Integer32"
+_RadiusAAA_Object = MibTableColumn
+radiusAAA = _RadiusAAA_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 1),
+    _RadiusAAA_Type()
+)
+radiusAAA.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusAAA.setStatus("current")
+
+
+class _RadiusAuthentication_Type(Integer32):
+    """Custom type radiusAuthentication based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusAuthentication_Type.__name__ = "Integer32"
+_RadiusAuthentication_Object = MibTableColumn
+radiusAuthentication = _RadiusAuthentication_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 2),
+    _RadiusAuthentication_Type()
+)
+radiusAuthentication.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusAuthentication.setStatus("current")
+
+
+class _RadiusAuthenLocal_Type(Integer32):
+    """Custom type radiusAuthenLocal based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusAuthenLocal_Type.__name__ = "Integer32"
+_RadiusAuthenLocal_Object = MibTableColumn
+radiusAuthenLocal = _RadiusAuthenLocal_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 3),
+    _RadiusAuthenLocal_Type()
+)
+radiusAuthenLocal.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusAuthenLocal.setStatus("current")
+
+
+class _RadiusAuthenEnable_Type(Integer32):
+    """Custom type radiusAuthenEnable based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusAuthenEnable_Type.__name__ = "Integer32"
+_RadiusAuthenEnable_Object = MibTableColumn
+radiusAuthenEnable = _RadiusAuthenEnable_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 4),
+    _RadiusAuthenEnable_Type()
+)
+radiusAuthenEnable.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusAuthenEnable.setStatus("current")
+
+
+class _RadiusAuthenEnableLocal_Type(Integer32):
+    """Custom type radiusAuthenEnableLocal based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusAuthenEnableLocal_Type.__name__ = "Integer32"
+_RadiusAuthenEnableLocal_Object = MibTableColumn
+radiusAuthenEnableLocal = _RadiusAuthenEnableLocal_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 5),
+    _RadiusAuthenEnableLocal_Type()
+)
+radiusAuthenEnableLocal.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusAuthenEnableLocal.setStatus("current")
+
+
+class _RadiusAcctExec_Type(Integer32):
+    """Custom type radiusAcctExec based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusAcctExec_Type.__name__ = "Integer32"
+_RadiusAcctExec_Object = MibTableColumn
+radiusAcctExec = _RadiusAcctExec_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 6),
+    _RadiusAcctExec_Type()
+)
+radiusAcctExec.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusAcctExec.setStatus("current")
+
+
+class _RadiusConsoleStatus_Type(Integer32):
+    """Custom type radiusConsoleStatus based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusConsoleStatus_Type.__name__ = "Integer32"
+_RadiusConsoleStatus_Object = MibTableColumn
+radiusConsoleStatus = _RadiusConsoleStatus_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 7),
+    _RadiusConsoleStatus_Type()
+)
+radiusConsoleStatus.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusConsoleStatus.setStatus("current")
+
+
+class _RadiusWebStatus_Type(Integer32):
+    """Custom type radiusWebStatus based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusWebStatus_Type.__name__ = "Integer32"
+_RadiusWebStatus_Object = MibTableColumn
+radiusWebStatus = _RadiusWebStatus_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 8),
+    _RadiusWebStatus_Type()
+)
+radiusWebStatus.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusWebStatus.setStatus("current")
+
+
+class _RadiusDot1xAuthen_Type(Integer32):
+    """Custom type radiusDot1xAuthen based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusDot1xAuthen_Type.__name__ = "Integer32"
+_RadiusDot1xAuthen_Object = MibTableColumn
+radiusDot1xAuthen = _RadiusDot1xAuthen_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 9),
+    _RadiusDot1xAuthen_Type()
+)
+radiusDot1xAuthen.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusDot1xAuthen.setStatus("current")
+
+
+class _RadiusDot1xAuthenLocal_Type(Integer32):
+    """Custom type radiusDot1xAuthenLocal based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusDot1xAuthenLocal_Type.__name__ = "Integer32"
+_RadiusDot1xAuthenLocal_Object = MibTableColumn
+radiusDot1xAuthenLocal = _RadiusDot1xAuthenLocal_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 10),
+    _RadiusDot1xAuthenLocal_Type()
+)
+radiusDot1xAuthenLocal.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusDot1xAuthenLocal.setStatus("current")
+
+
+class _RadiusDot1xAuthor_Type(Integer32):
+    """Custom type radiusDot1xAuthor based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusDot1xAuthor_Type.__name__ = "Integer32"
+_RadiusDot1xAuthor_Object = MibTableColumn
+radiusDot1xAuthor = _RadiusDot1xAuthor_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 11),
+    _RadiusDot1xAuthor_Type()
+)
+radiusDot1xAuthor.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusDot1xAuthor.setStatus("current")
+
+
+class _RadiusDot1xAcct_Type(Integer32):
+    """Custom type radiusDot1xAcct based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("enable", 0),
+          ("disable", 1))
+    )
+
+
+_RadiusDot1xAcct_Type.__name__ = "Integer32"
+_RadiusDot1xAcct_Object = MibTableColumn
+radiusDot1xAcct = _RadiusDot1xAcct_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 2, 1, 12),
+    _RadiusDot1xAcct_Type()
+)
+radiusDot1xAcct.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusDot1xAcct.setStatus("current")
+_RadiusServerCfg_ObjectIdentity = ObjectIdentity
+radiusServerCfg = _RadiusServerCfg_ObjectIdentity(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 3)
+)
+_RadServerHost_Type = OctetString
+_RadServerHost_Object = MibScalar
+radServerHost = _RadServerHost_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 3, 1),
+    _RadServerHost_Type()
+)
+radServerHost.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radServerHost.setStatus("current")
+_RadSharedKey_Type = OctetString
+_RadSharedKey_Object = MibScalar
+radSharedKey = _RadSharedKey_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 3, 2),
+    _RadSharedKey_Type()
+)
+radSharedKey.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radSharedKey.setStatus("current")
+
+
+class _RadAddAction_Type(Integer32):
+    """Custom type radAddAction based on Integer32"""
+    subtypeSpec = Integer32.subtypeSpec
+    subtypeSpec += ConstraintsUnion(
+        SingleValueConstraint(
+            *(0,
+              1)
+        )
+    )
+    namedValues = NamedValues(
+        *(("add", 0),
+          ("del", 1))
+    )
+
+
+_RadAddAction_Type.__name__ = "Integer32"
+_RadAddAction_Object = MibScalar
+radAddAction = _RadAddAction_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 3, 3),
+    _RadAddAction_Type()
+)
+radAddAction.setMaxAccess("read-write")
+if mibBuilder.loadTexts:
+    radAddAction.setStatus("current")
+_RadiusServerTable_Object = MibTable
+radiusServerTable = _RadiusServerTable_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 4)
+)
+if mibBuilder.loadTexts:
+    radiusServerTable.setStatus("current")
+_RadiusServerEntry_Object = MibTableRow
+radiusServerEntry = _RadiusServerEntry_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 4, 1)
+)
+radiusServerEntry.setIndexNames(
+    (0, "V1600D", "radiusServer"),
+)
+if mibBuilder.loadTexts:
+    radiusServerEntry.setStatus("current")
+_RadiusServer_Type = OctetString
+_RadiusServer_Object = MibTableColumn
+radiusServer = _RadiusServer_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 4, 1, 1),
+    _RadiusServer_Type()
+)
+radiusServer.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusServer.setStatus("current")
+
+
+class _RadiusKey_Type(OctetString):
+    """Custom type radiusKey based on OctetString"""
+    defaultHexValue = ""
+
+
+_RadiusKey_Type.__name__ = "OctetString"
+_RadiusKey_Object = MibTableColumn
+radiusKey = _RadiusKey_Object(
+    (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 26, 4, 1, 2),
+    _RadiusKey_Type()
+)
+radiusKey.setMaxAccess("read-only")
+if mibBuilder.loadTexts:
+    radiusKey.setStatus("current")
 _V1600dMstp_ObjectIdentity = ObjectIdentity
 v1600dMstp = _V1600dMstp_ObjectIdentity(
     (1, 3, 6, 1, 4, 1, 37950, 1, 1, 5, 10, 27)
@@ -30286,7 +31021,7 @@ class _PimMode_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("disable", 0),
-          ("sparse-mode", 1))
+          ("sparse_mode", 1))
     )
 
 
@@ -30644,7 +31379,7 @@ class _PimMRouteMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        ("sprase-mode", 1)
+        ("sprase_mode", 1)
     )
 
 
@@ -30956,7 +31691,7 @@ class _PimInfMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        ("sprase-mode", 1)
+        ("sprase_mode", 1)
     )
 
 
@@ -33892,8 +34627,8 @@ class _OnuAuthInfo2DeregReason_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("wire-down", 0),
-          ("power-off", 1))
+        *(("wire_down", 0),
+          ("power_off", 1))
     )
 
 
@@ -34339,8 +35074,8 @@ class _OnlineOnuAuthInfoDeregReason_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("wire-down", 0),
-          ("power-off", 1))
+        *(("wire_down", 0),
+          ("power_off", 1))
     )
 
 
@@ -35091,7 +35826,7 @@ class _Ipv6Support_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("not-support", 0),
+        *(("not_support", 0),
           ("support", 1))
     )
 
@@ -35118,9 +35853,9 @@ class _PowerControl_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("not-support", 0),
-          ("support-onu-tx", 1),
-          ("support-onu-tx-and-rx", 2))
+        *(("not_support", 0),
+          ("support_onu_tx", 1),
+          ("support_onu_tx_and_rx", 2))
     )
 
 
@@ -35382,9 +36117,9 @@ class _SnmpVer_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("SNMP-V1", 1),
-          ("SNMP-V2", 2),
-          ("SNMP-V3", 3))
+        *(("SNMP_V1", 1),
+          ("SNMP_V2", 2),
+          ("SNMP_V3", 3))
     )
 
 
@@ -35526,7 +36261,7 @@ class _SlaScheduleScheme_Type(Integer32):
     namedValues = NamedValues(
         *(("SP", 0),
           ("WRR", 1),
-          ("SP-WRR", 2))
+          ("SP_WRR", 2))
     )
 
 
@@ -37300,9 +38035,9 @@ class _OnuSlaMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("sp-basic", 1),
+        *(("sp_basic", 1),
           ("wrr", 2),
-          ("sp-wrr", 3))
+          ("sp_wrr", 3))
     )
 
 
@@ -39080,7 +39815,7 @@ class _PriWifiChannelWidth_Type(Integer32):
     namedValues = NamedValues(
         *(("s20", 0),
           ("s40", 1),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -39241,8 +39976,8 @@ class _PriSsidAuthMode_Type(Integer32):
           ("wpa", 5),
           ("wpa2psk", 6),
           ("wpa2", 7),
-          ("wpa-wpa2", 8),
-          ("wpapsk-wpa2psk", 9))
+          ("wpa_wpa2", 8),
+          ("wpapsk_wpa2psk", 9))
     )
 
 
@@ -39821,10 +40556,10 @@ class _PriWanMode_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("other", 100))
     )
 
@@ -40997,7 +41732,7 @@ class _OnuPriDhcpPoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -42776,7 +43511,7 @@ class _OnuPriDhcpv6PoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -43257,7 +43992,7 @@ class _PriWifiChannelWidth1_Type(Integer32):
         *(("s20", 0),
           ("s40", 1),
           ("s80", 2),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -43598,10 +44333,10 @@ class _PriV6WanMode_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("voip", 7),
           ("other", 100))
     )
@@ -43695,7 +44430,7 @@ class _PriV6ConnIpProtocol_Type(Integer32):
     namedValues = NamedValues(
         *(("ipv4", 0),
           ("ipv6", 1),
-          ("ipv4-ipv6", 2))
+          ("ipv4_ipv6", 2))
     )
 
 
@@ -45361,7 +46096,7 @@ class _PriWifiSwichChannelWidth_Type(Integer32):
     namedValues = NamedValues(
         *(("s20", 0),
           ("s40", 1),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -45535,8 +46270,8 @@ class _PriWifiSsidAuthMode_Type(Integer32):
           ("wpa", 5),
           ("wpa2psk", 6),
           ("wpa2", 7),
-          ("wpa-wpa2", 8),
-          ("wpapsk-wpa2psk", 9))
+          ("wpa_wpa2", 8),
+          ("wpapsk_wpa2psk", 9))
     )
 
 
@@ -45923,10 +46658,10 @@ class _PriWanModeS_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("other", 100))
     )
 
@@ -46807,7 +47542,7 @@ class _PriDhcpPoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -48441,7 +49176,7 @@ class _PriDhcpv6PoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -48852,7 +49587,7 @@ class _PriWifiSwitchChannelWidth_Type(Integer32):
         *(("s20", 0),
           ("s40", 1),
           ("s80", 2),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -49025,10 +49760,10 @@ class _PriV6WanModeS_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("voip", 7),
           ("other", 100))
     )
@@ -49122,7 +49857,7 @@ class _PriV6ConnIpProtocolS_Type(Integer32):
     namedValues = NamedValues(
         *(("ipv4", 0),
           ("ipv6", 1),
-          ("ipv4-ipv6", 2))
+          ("ipv4_ipv6", 2))
     )
 
 
@@ -50805,7 +51540,7 @@ class _PriPotsPtDtmfMode_Type(Integer32):
     namedValues = NamedValues(
         *(("transparent", 0),
           ("rfc2833", 1),
-          ("rfc2833-redundancy", 2),
+          ("rfc2833_redundancy", 2),
           ("outband", 3))
     )
 
@@ -51564,7 +52299,7 @@ class _PriPotsPtDtmfModeS_Type(Integer32):
     namedValues = NamedValues(
         *(("transparent", 0),
           ("rfc2833", 1),
-          ("rfc2833-redundancy", 2),
+          ("rfc2833_redundancy", 2),
           ("outband", 3))
     )
 
@@ -57195,7 +57930,7 @@ class _MVlanTagsMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("no-strip", 0),
+        *(("no_strip", 0),
           ("strip", 1),
           ("vlanTrans", 2))
     )
@@ -57564,8 +58299,8 @@ class _QueryMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("monitor-current", 1),
-          ("monitor-history", 2))
+        *(("monitor_current", 1),
+          ("monitor_history", 2))
     )
 
 
@@ -58068,7 +58803,7 @@ class _VoipGIPMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("Static-IP", 0),
+        *(("Static_IP", 0),
           ("DHCP", 1),
           ("PPPoE", 2))
     )
@@ -58171,7 +58906,7 @@ class _VoipGIPTagFlag_Type(Integer32):
     namedValues = NamedValues(
         *(("Transparent", 0),
           ("Tag", 1),
-          ("Vlan-Stacking", 2))
+          ("Vlan_Stacking", 2))
     )
 
 
@@ -58447,11 +59182,11 @@ class _VoipPostStatusPortStatus_Type(Integer32):
           ("Offhook", 2),
           ("Dialing", 3),
           ("Ringing", 4),
-          ("Ring-Back", 5),
+          ("Ring_Back", 5),
           ("Connecting", 6),
           ("Connected", 7),
-          ("Release-connection", 8),
-          ("Register-fail", 9),
+          ("Release_connection", 8),
+          ("Register_fail", 9),
           ("Inactive", 10))
     )
 
@@ -58583,10 +59318,10 @@ class _H248IADOperStatus_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("Registering", 0),
-          ("Register-success", 1),
-          ("IAD-fault", 2),
+          ("Register_success", 1),
+          ("IAD_fault", 2),
           ("Deregister", 3),
-          ("IAD-restarting", 4))
+          ("IAD_restarting", 4))
     )
 
 
@@ -58718,8 +59453,8 @@ class _H248ParamTRegMode_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("Ipaddr", 0),
-          ("Domain-name", 1),
-          ("Device-name", 2))
+          ("Domain_name", 1),
+          ("Device_name", 2))
     )
 
 
@@ -59233,7 +59968,7 @@ class _FaxModemVoiceCtl_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("Negotiation", 0),
-          ("Auto-VBD", 1))
+          ("Auto_VBD", 1))
     )
 
 
@@ -59348,7 +60083,7 @@ class _VoipIpMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("Static-IP", 0),
+        *(("Static_IP", 0),
           ("DHCP", 1),
           ("PPPoE", 2))
     )
@@ -59471,7 +60206,7 @@ class _VoipTagFlag_Type(Integer32):
     namedValues = NamedValues(
         *(("Transparent", 0),
           ("Tag", 1),
-          ("Vlan-Stacking", 2))
+          ("Vlan_Stacking", 2))
     )
 
 
@@ -59713,7 +60448,7 @@ class _IpRegMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        ("ip-addr", 1)
+        ("ip_addr", 1)
     )
 
 
@@ -60253,8 +60988,8 @@ class _H248ParamRegMode_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("IPAddr", 0),
-          ("Domain-name", 1),
-          ("Device-name", 2))
+          ("Domain_name", 1),
+          ("Device_name", 2))
     )
 
 
@@ -63153,9 +63888,9 @@ class _CtcSlaMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("sp-basic", 1),
+        *(("sp_basic", 1),
           ("wrr", 2),
-          ("sp-wrr", 3))
+          ("sp_wrr", 3))
     )
 
 
@@ -65969,7 +66704,7 @@ class _WlanChannelWidth_Type(Integer32):
     namedValues = NamedValues(
         *(("s20", 0),
           ("s40", 1),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -66092,8 +66827,8 @@ class _SsidAuthMode_Type(Integer32):
           ("wpa", 5),
           ("wpa2psk", 6),
           ("wpa2", 7),
-          ("wpa-wpa2", 8),
-          ("wpapsk-wpa2psk", 9))
+          ("wpa_wpa2", 8),
+          ("wpapsk_wpa2psk", 9))
     )
 
 
@@ -66598,10 +67333,10 @@ class _WanMode_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("other", 100))
     )
 
@@ -67551,7 +68286,7 @@ class _DhcpPoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -68456,7 +69191,7 @@ class _WifiChannelWidth_Type(Integer32):
         *(("s20", 0),
           ("s40", 1),
           ("s80", 2),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -68644,7 +69379,7 @@ class _Dhcpv6PoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -69070,10 +69805,10 @@ class _V6WanMode_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("voip", 7),
           ("other", 100))
     )
@@ -69167,7 +69902,7 @@ class _V6ConnIpProtocol_Type(Integer32):
     namedValues = NamedValues(
         *(("ipv4", 0),
           ("ipv6", 1),
-          ("ipv4-ipv6", 2))
+          ("ipv4_ipv6", 2))
     )
 
 
@@ -70454,7 +71189,7 @@ class _VoipVlanMode_Type(Integer32):
     namedValues = NamedValues(
         *(("transparent", 1),
           ("tag", 2),
-          ("vlan-stacking", 3))
+          ("vlan_stacking", 3))
     )
 
 
@@ -70658,7 +71393,7 @@ class _CtcRegMode_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("ip-addr", 0),
+        *(("ip_addr", 0),
           ("realm", 1),
           ("device", 2))
     )
@@ -71820,7 +72555,7 @@ class _PriDtmfMode_Type(Integer32):
     namedValues = NamedValues(
         *(("transparent", 0),
           ("rfc2833", 1),
-          ("rfc2833-redundancy", 2),
+          ("rfc2833_redundancy", 2),
           ("outband", 3))
     )
 
@@ -77191,8 +77926,8 @@ class _OnuSleepModeS_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("none", 1),
-          ("tx-sleep-only", 2),
-          ("tx-and-rx-sleep", 3))
+          ("tx_sleep_only", 2),
+          ("tx_and_rx_sleep", 3))
     )
 
 
@@ -77841,7 +78576,7 @@ class _OnuWifiSwichChannelWidth_Type(Integer32):
     namedValues = NamedValues(
         *(("s20", 0),
           ("s40", 1),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -77995,8 +78730,8 @@ class _OnuWifiSsidAuthMode_Type(Integer32):
           ("wpa", 5),
           ("wpa2psk", 6),
           ("wpa2", 7),
-          ("wpa-wpa2", 8),
-          ("wpapsk-wpa2psk", 9))
+          ("wpa_wpa2", 8),
+          ("wpapsk_wpa2psk", 9))
     )
 
 
@@ -78363,10 +79098,10 @@ class _WanModeS_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("other", 100))
     )
 
@@ -79271,7 +80006,7 @@ class _OnuDhcpPoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -80162,7 +80897,7 @@ class _OnuWifiSwitchChannelWidth_Type(Integer32):
         *(("s20", 0),
           ("s40", 1),
           ("s80", 2),
-          ("s20-40", 3))
+          ("s20_40", 3))
     )
 
 
@@ -80360,7 +81095,7 @@ class _OnuDhcpv6PoolType_Type(Integer32):
         *(("pc", 0),
           ("camera", 1),
           ("stb", 2),
-          ("ip-phone", 3))
+          ("ip_phone", 3))
     )
 
 
@@ -80677,10 +81412,10 @@ class _V6WanModeS_Type(Integer32):
         *(("internet", 0),
           ("multicast", 1),
           ("tr069", 2),
-          ("tr069-internet", 3),
-          ("tr069-voip", 4),
-          ("voip-internet", 5),
-          ("tr069-voip-internet", 6),
+          ("tr069_internet", 3),
+          ("tr069_voip", 4),
+          ("voip_internet", 5),
+          ("tr069_voip_internet", 6),
           ("voip", 7),
           ("other", 100))
     )
@@ -80774,7 +81509,7 @@ class _V6wanConnIpProtocolS_Type(Integer32):
     namedValues = NamedValues(
         *(("ipv4", 0),
           ("ipv6", 1),
-          ("ipv4-ipv6", 2))
+          ("ipv4_ipv6", 2))
     )
 
 
@@ -81906,7 +82641,7 @@ class _VoipGlobalModeS_Type(Integer32):
     namedValues = NamedValues(
         *(("transparent", 1),
           ("tag", 2),
-          ("vlan-stacking", 3))
+          ("vlan_stacking", 3))
     )
 
 
@@ -82098,9 +82833,9 @@ class _H248ProRegModeS_Type(Integer32):
         )
     )
     namedValues = NamedValues(
-        *(("ip-addr", 0),
-          ("realm-name", 1),
-          ("device-name", 2))
+        *(("ip_addr", 0),
+          ("realm_name", 1),
+          ("device_name", 2))
     )
 
 
@@ -82905,7 +83640,7 @@ class _VoipFaxModemControlS_Type(Integer32):
     )
     namedValues = NamedValues(
         *(("negotiation", 1),
-          ("auto-vbd", 2))
+          ("auto_vbd", 2))
     )
 
 
@@ -83294,7 +84029,7 @@ class _PotsPtDtmfMode_Type(Integer32):
     namedValues = NamedValues(
         *(("transparent", 0),
           ("rfc2833", 1),
-          ("rfc2833-redundancy", 2),
+          ("rfc2833_redundancy", 2),
           ("outband", 3))
     )
 
@@ -87393,6 +88128,42 @@ mibBuilder.exportSymbols(
        "tacplusServerEntry": tacplusServerEntry,
        "tacplusServer": tacplusServer,
        "tacplusKey": tacplusKey,
+       "v1600Radius": v1600Radius,
+       "radiusCfg": radiusCfg,
+       "radAAAEnable": radAAAEnable,
+       "radAuthen": radAuthen,
+       "radAuthenLocal": radAuthenLocal,
+       "radAuthenEnable": radAuthenEnable,
+       "radAuthenEnableLocal": radAuthenEnableLocal,
+       "radAcctExec": radAcctExec,
+       "enableConsoleRad": enableConsoleRad,
+       "enableWebRad": enableWebRad,
+       "radDot1xAuthen": radDot1xAuthen,
+       "radDot1xAuthenLocal": radDot1xAuthenLocal,
+       "radDot1xAuthor": radDot1xAuthor,
+       "radDot1xAcct": radDot1xAcct,
+       "radiusCfgTable": radiusCfgTable,
+       "radiusCfgEntry": radiusCfgEntry,
+       "radiusAAA": radiusAAA,
+       "radiusAuthentication": radiusAuthentication,
+       "radiusAuthenLocal": radiusAuthenLocal,
+       "radiusAuthenEnable": radiusAuthenEnable,
+       "radiusAuthenEnableLocal": radiusAuthenEnableLocal,
+       "radiusAcctExec": radiusAcctExec,
+       "radiusConsoleStatus": radiusConsoleStatus,
+       "radiusWebStatus": radiusWebStatus,
+       "radiusDot1xAuthen": radiusDot1xAuthen,
+       "radiusDot1xAuthenLocal": radiusDot1xAuthenLocal,
+       "radiusDot1xAuthor": radiusDot1xAuthor,
+       "radiusDot1xAcct": radiusDot1xAcct,
+       "radiusServerCfg": radiusServerCfg,
+       "radServerHost": radServerHost,
+       "radSharedKey": radSharedKey,
+       "radAddAction": radAddAction,
+       "radiusServerTable": radiusServerTable,
+       "radiusServerEntry": radiusServerEntry,
+       "radiusServer": radiusServer,
+       "radiusKey": radiusKey,
        "v1600dMstp": v1600dMstp,
        "mstpEn": mstpEn,
        "mstpCfg": mstpCfg,

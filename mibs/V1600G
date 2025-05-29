@@ -2089,8 +2089,7 @@
 		-- 1.3.6.1.4.1.37950.1.1.6.1.1.7.13.3
 		gIgmpPortId OBJECT-TYPE
 			SYNTAX Integer32
-			MAX-
-read-write
+			MAX-ACCESS read-write
 			STATUS current
 			DESCRIPTION
 				"Description."
