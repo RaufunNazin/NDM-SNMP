@@ -286,7 +286,7 @@ def parse_vsol_onu_data(data_str): # Renamed argument to avoid conflict with int
         if index_key_str not in onu_data:
             onu_data[index_key_str] = {}
             # Populate IFINDEX using the string key, converted to an integer
-            onu_data[index_key_str]['IFINDEX'] = int(index_key_str)
+            onu_data[index_key_str]['IFINDEX'] = index_key_str
 
     # MAC Address
     mac_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?onuMacAddress\.(\d+) = Hex-STRING: ([0-9A-F ]+)', data_str)
