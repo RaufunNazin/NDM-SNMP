@@ -301,13 +301,13 @@ def parse_vsol_onu_data(data_str): # Renamed argument to avoid conflict with int
         onu_data[portandonu]['SLNO'] = format_mac(sn)
     
     # Operation Status - Made INTEGER32 optional in regex
-    status_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoOpSta)\.((?:\d+\.)*\d+) = (?:INTEGER): "?([^"]+)"?', data_str)
+    status_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoOpSta)\.((?:\d+\.)*\d+) = (?:INTEGER): \d', data_str)
     for name, portandonu, status_val in status_matches:
         ensure_onu_entry(portandonu)
         onu_data[portandonu]['STATUS'] = int(status_val)
     
     # Admin Status - Made INTEGER32 optional in regex
-    admin_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuStaInfoAdminSta)\.((?:\d+\.)*\d+) = (?:INTEGER): "?([^"]+)"?', data_str)
+    admin_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuStaInfoAdminSta)\.((?:\d+\.)*\d+) = (?:INTEGER): \d', data_str)
     for name, portandonu, status_val in admin_matches:
         ensure_onu_entry(portandonu)
         # Assuming '2' means disabled, and you want to map it to status '3'

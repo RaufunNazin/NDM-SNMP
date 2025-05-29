@@ -79,7 +79,7 @@ async def main():
         f.close()
     print(f"SNMP output saved to {output_file}")
     print("Parsing SNMP output...")
-    print(snmp_output)
+    # print(snmp_output)
     
     # Parse the SNMP output
     parse_function = get_process_function(brand)
