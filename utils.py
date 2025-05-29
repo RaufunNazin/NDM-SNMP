@@ -1,4 +1,3 @@
-from turtle import up
 from pysnmp.smi import builder, view
 import re
 from datetime import datetime, timedelta
