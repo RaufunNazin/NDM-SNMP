@@ -298,7 +298,7 @@ def parse_vsol_onu_data(data_str): # Renamed argument to avoid conflict with int
     sn_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoSn)\.((?:\d+\.)*\d+) = (?:STRING|Hex-STRING): "?([^"]+)"?', data_str)
     for name, portandonu, sn in sn_matches:
         ensure_onu_entry(portandonu)
-        onu_data[portandonu]['SLNO'] = format_mac(sn)
+        onu_data[portandonu]['SLNO'] = sn
     
     # Operation Status - Made INTEGER32 optional in regex
     status_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoOpSta)\.((?:\d+\.)*\d+) = (?:INTEGER): (\d)', data_str)
@@ -322,16 +322,16 @@ def parse_vsol_onu_data(data_str): # Renamed argument to avoid conflict with int
     
     # Time Since Last Register (for UP_SINCE calculation)
     # Sample output shows "Counter32: 5954", assuming value is in seconds.
-    time_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoSysUpTime)\.((?:\d+\.)*\d+) = (?:STRING): "?([^"]+)"?', data_str)
+    time_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoSysUpTime)\.((?:\d+\.)*\d+) = STRING: "(N\/A|\d+ s)"', data_str)
     for name, portandonu, uptime in time_matches:
         ensure_onu_entry(portandonu)
         current_time = datetime.now()
-        if uptime == "N/A":
-            up_since = None
-        else:
-            seconds_str = uptime.split(' ')[0]  # Extract the first part before any text
-            up_since = current_time - timedelta(seconds=int(seconds_str))
-        onu_data[portandonu]['UP_SINCE'] = up_since
+    if uptime == "N/A":
+        up_since = None
+    else:
+        seconds = int(uptime.split(' ')[0])  # safely extract the number before ' s'
+        up_since = current_time - timedelta(seconds=seconds)
+    onu_data[portandonu]['UP_SINCE'] = up_since
     
     # Vendor ID
     vendor_matches = re.findall(r'(?:[A-Za-z0-9\-]+::)?(gOnuDetailInfoVendorId)\.((?:\d+\.)*\d+) = (?:STRING): "?([^"]+)"?', data_str)
